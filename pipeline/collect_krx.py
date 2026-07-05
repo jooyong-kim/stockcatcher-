@@ -23,6 +23,7 @@ OUT_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "screener.json"
 SLEEP = 0.35               # KRX 요청 간격 (예의상 유지)
 EXCLUDE_KEYWORDS = ("스팩", "리츠")   # 이름 기준 제외
 COMMON_ONLY = True         # True면 보통주만 (코드 끝자리 0) — 우선주 제외
+SUPPLY_DAYS = 120          # 외국인/기관 수급 누적 조회 거래일 수
 
 
 def business_days(n):
@@ -99,26 +100,37 @@ def collect(dates):
 
 
 def investor_flags(dates):
-    """최근 3거래일 외국인/기관합계 순매수거래대금 (종목별 일자 리스트)"""
-    frg, inst = {}, {}
-    for d in dates[-3:]:
+    """최근 SUPPLY_DAYS 거래일 외국인/기관합계 순매수거래대금 누적 (종목별 합계)
+
+    KRX는 기간을 한 번에 조회할 수 있어, 하루씩 120번 부르는 대신
+    시작일~종료일 범위를 시장·투자자별 1회씩 조회한다(총 4회).
+    """
+    frg_sum, inst_sum = {}, {}       # 종목별 기간 순매수 합계(원)
+    frg_days, inst_days = {}, {}     # 종목별 순매수(양수) 일수 — 연속 판정 대체용
+    span = dates[-SUPPLY_DAYS:] if len(dates) >= SUPPLY_DAYS else dates
+    f_from, f_to = span[0], span[-1]
+    for inv, sum_store, day_store in (("외국인", frg_sum, frg_days),
+                                      ("기관합계", inst_sum, inst_days)):
         for mkt in ("KOSPI", "KOSDAQ"):
-            for inv, store in (("외국인", frg), ("기관합계", inst)):
-                df = None
-                for attempt in range(3):
-                    try:
-                        df = stock.get_market_net_purchases_of_equities(d, d, mkt, inv)
-                        break
-                    except Exception as e:
-                        print(f"  수급 재시도 {attempt+1}/3 — {d} {mkt} {inv}: {e}", flush=True)
-                        time.sleep(2 + attempt * 3)
-                if df is None or df.empty:
-                    continue
-                df = df.reset_index()
-                for _, row in df.iterrows():
-                    store.setdefault(str(row["티커"]), []).append(float(row["순매수거래대금"]))
-                time.sleep(SLEEP)
-    return frg, inst
+            df = None
+            for attempt in range(3):
+                try:
+                    df = stock.get_market_net_purchases_of_equities(f_from, f_to, mkt, inv)
+                    break
+                except Exception as e:
+                    print(f"  수급 재시도 {attempt+1}/3 — {mkt} {inv}: {e}", flush=True)
+                    time.sleep(2 + attempt * 3)
+            if df is None or df.empty:
+                continue
+            df = df.reset_index()
+            for _, row in df.iterrows():
+                code = str(row["티커"])
+                net = float(row["순매수거래대금"])
+                sum_store[code] = sum_store.get(code, 0) + net
+                if net > 0:
+                    day_store[code] = day_store.get(code, 0) + 1
+            time.sleep(SLEEP)
+    return frg_sum, inst_sum, frg_days, inst_days
 
 
 def ema(arr, n):
@@ -362,8 +374,8 @@ def main():
             names[t] = stock.get_market_ticker_name(t)
         time.sleep(SLEEP)
 
-    print("  수급(외국인/기관) 3거래일 수집 중…", flush=True)
-    frg, inst = investor_flags(dates)
+    print(f"  수급(외국인/기관) {SUPPLY_DAYS}거래일 누적 수집 중…", flush=True)
+    frg_sum, inst_sum, frg_days, inst_days = investor_flags(dates)
 
     results = []
     charts = {}
@@ -386,11 +398,22 @@ def main():
         r = analyze_ticker(code, name, g["market"].iloc[-1],
                            op, hi, lw, c, vv, g["거래대금"].to_numpy(dtype=float))
         if r:
-            fr, ins = frg.get(code, []), inst.get(code, [])
-            r["frgBuy3"] = bool(len(fr) == 3 and all(x > 0 for x in fr))
-            r["instBuy3"] = bool(len(ins) == 3 and all(x > 0 for x in ins))
-            r["frgNet3"] = round(sum(fr)) if fr else 0
-            r["instNet3"] = round(sum(ins)) if ins else 0
+            fnet = round(frg_sum.get(code, 0))
+            inet = round(inst_sum.get(code, 0))
+            fdays = frg_days.get(code, 0)
+            idays = inst_days.get(code, 0)
+            # 120일 누적 순매수(양수) = 기간 전체 순매수 우위
+            r["frgBuy120"] = bool(fnet > 0)
+            r["instBuy120"] = bool(inet > 0)
+            r["frgNet120"] = fnet
+            r["instNet120"] = inet
+            r["frgDays120"] = fdays      # 120일 중 외국인 순매수 일수
+            r["instDays120"] = idays     # 120일 중 기관 순매수 일수
+            # 하위호환(VOL6 프론트가 참조하는 3일 필드) — 120일 지표로 매핑
+            r["frgBuy3"] = r["frgBuy120"]
+            r["instBuy3"] = r["instBuy120"]
+            r["frgNet3"] = fnet
+            r["instNet3"] = inet
             results.append(r)
             charts[code] = {
                 "o": [int(x) for x in op[-CHART_LEN:]],
