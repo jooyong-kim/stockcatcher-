@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>스톡캐쳐 STOCK CATCHER · 코스피/코스닥 종목 탐색기 VOL17</title>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root{
+    --bg:#0B0E14; --surface:#131923; --surface2:#0F141D; --line:#202A38;
+    --gold:#D4A94E; --gold-soft:rgba(212,169,78,.14); --gold-line:rgba(212,169,78,.38);
+    --up:#F0504F; --down:#4A8CF7;
+    --tx:#E7ECF3; --tx2:#93A0B1; --tx3:#5C6B7E;
+  }
+
+  /* ── 기본 리셋 ── */
+  *{box-sizing:border-box} body{margin:0} h1,h2,h3,p{margin:0}
+  button{background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:0;text-align:inherit}
+  a{color:inherit;text-decoration:none}
+  svg{display:block}
+  /* ── 유틸리티 ── */
+  .flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.block{display:block}
+  .fixed{position:fixed}.sticky{position:sticky}.top-0{top:0}.inset-0{top:0;right:0;bottom:0;left:0}
+  .z-10{z-index:10}.z-50{z-index:50}
+  .items-center{align-items:center}.items-end{align-items:flex-end}.items-start{align-items:flex-start}
+  .justify-between{justify-content:space-between}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}
+  .flex-wrap{flex-wrap:wrap}.flex-1{flex:1 1 0%}.min-w-0{min-width:0}
+  .gap-1\.5{gap:6px}.gap-2{gap:8px}.gap-2\.5{gap:10px}.gap-3{gap:12px}.gap-6{gap:24px}
+  .mx-auto{margin-left:auto;margin-right:auto}.ml-auto{margin-left:auto}.ml-1{margin-left:4px}.mr-1{margin-right:4px}
+  .mt-0\.5{margin-top:2px}.mt-1\.5{margin-top:6px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-10{margin-top:40px}
+  .mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}
+  .p-0{padding:0}.p-4{padding:16px}.p-5{padding:20px}.p-10{padding:40px}
+  .px-4{padding-left:16px;padding-right:16px}.py-1\.5{padding-top:6px;padding-bottom:6px}.py-3{padding-top:12px;padding-bottom:12px}.py-10{padding-top:40px;padding-bottom:40px}
+  .pt-3{padding-top:12px}.pt-7{padding-top:28px}.pb-4{padding-bottom:16px}.pb-24{padding-bottom:96px}
+  .w-9{width:36px}.h-9{height:36px}.w-full{width:100%}
+  .max-w-6xl{max-width:1152px}.max-w-lg{max-width:512px}.max-w-2xl{max-width:720px}.max-w-sm{max-width:384px}.max-h-\[88vh\]{max-height:88vh}
+  .rounded-xl{border-radius:12px}.border-b{border-bottom:1px solid var(--line)}
+  .overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}
+  .text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}
+  .text-xs{font-size:12px}.text-lg{font-size:18px}.text-xl{font-size:20px}
+  .text-\[11px\]{font-size:11px}.text-\[12px\]{font-size:12px}.text-\[13px\]{font-size:13px}.text-\[14px\]{font-size:14px}.text-\[15px\]{font-size:15px}.text-\[17px\]{font-size:17px}
+  .font-normal{font-weight:400}.font-semibold{font-weight:600}.font-bold{font-weight:700}.font-extrabold{font-weight:800}
+  .tracking-tight{letter-spacing:-0.025em}.leading-relaxed{line-height:1.7}
+  .align-middle{vertical-align:middle}.opacity-70{opacity:.7}.transition{transition:all .15s}
+  .hover\:underline:hover{text-decoration:underline}
+  .hover\:brightness-110:hover{filter:brightness(1.1)}
+  .space-y-2>*+*{margin-top:8px}
+  @media(min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:items-center{align-items:center}.md\:p-4{padding:16px}}
+
+  html,body{background:var(--bg); color:var(--tx); font-family:'Pretendard Variable',Pretendard,-apple-system,'Noto Sans KR',sans-serif;}
+  .num{font-variant-numeric:tabular-nums; letter-spacing:-0.01em;}
+  ::-webkit-scrollbar{height:8px;width:8px} ::-webkit-scrollbar-thumb{background:#243040;border-radius:8px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:14px;}
+  .chip{border:1px solid var(--line); background:var(--surface2); color:var(--tx2); border-radius:999px; padding:7px 13px; font-size:13px; cursor:pointer; transition:all .15s; user-select:none; display:inline-flex; align-items:center; gap:6px;}
+  .chip:hover{border-color:#33405333; color:var(--tx); border-color:#3A4964;}
+  .chip.on{background:var(--gold-soft); border-color:var(--gold-line); color:var(--gold); font-weight:600;}
+  .tabbtn{padding:10px 4px; font-size:15px; font-weight:600; color:var(--tx3); border-bottom:2px solid transparent; transition:all .15s;}
+  .tabbtn.on{color:var(--gold); border-color:var(--gold);}
+  .badge{font-size:11px; padding:3px 8px; border-radius:6px; background:var(--gold-soft); color:var(--gold); border:1px solid var(--gold-line); white-space:nowrap;}
+  .badge.gray{background:#1B2330; color:var(--tx2); border-color:var(--line);}
+  select{background:var(--surface2);border:1px solid var(--line);border-radius:8px;color:var(--tx);padding:6px 10px;font-size:13px;outline:none;}
+  input[type=number],input[type=text]{background:var(--surface2); border:1px solid var(--line); border-radius:8px; color:var(--tx); padding:6px 10px; font-size:13px; outline:none; width:100%;}
+  input:focus{border-color:var(--gold-line);}
+  table{border-collapse:separate; border-spacing:0;}
+  th{font-size:12px; color:var(--tx3); font-weight:600; text-align:right; padding:10px 12px; border-bottom:1px solid var(--line); white-space:nowrap;}
+  td{padding:12px; font-size:14px; border-bottom:1px solid #161D29; text-align:right; white-space:nowrap;}
+  th:first-child,td:first-child{text-align:left;}
+  tr.row:hover td{background:#161D29;}
+  .grade{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;flex:none;}
+  .g-S{background:rgba(212,169,78,.18);color:#EFC96C;border:1px solid rgba(212,169,78,.5);}
+  .g-A{background:rgba(240,80,79,.14);color:#FF8A89;border:1px solid rgba(240,80,79,.35);}
+  .g-B{background:rgba(74,140,247,.14);color:#8FB6FA;border:1px solid rgba(74,140,247,.35);}
+  .g-C{background:#1B2330;color:var(--tx2);border:1px solid var(--line);}
+  .and-pill{background:var(--gold-soft); border:1px solid var(--gold-line); color:var(--gold); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600;}
+  .and-word{color:var(--tx3); font-size:11px; font-weight:700; letter-spacing:.08em;}
+  .fadeup{animation:fadeup .3s ease both;} @keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fadeup{animation:none}}
+  .mono{font-family:ui-monospace,'JetBrains Mono',Menlo,monospace;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react" data-react-runtime="classic">
+const {useState, useMemo, useEffect, useRef} = React;
+
+/* ================================================================
+   1) 데모 데이터 생성 (시드 기반)
+================================================================ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+const UNIVERSE = [
+  ["005930","삼성전자","KOSPI",72000],["000660","SK하이닉스","KOSPI",195000],["373220","LG에너지솔루션","KOSPI",380000],
+  ["005380","현대차","KOSPI",245000],["000270","기아","KOSPI",118000],["035420","NAVER","KOSPI",212000],
+  ["035720","카카오","KOSPI",48000],["068270","셀트리온","KOSPI",182000],["005490","POSCO홀딩스","KOSPI",325000],
+  ["207940","삼성바이오로직스","KOSPI",890000],["105560","KB금융","KOSPI",88000],["055550","신한지주","KOSPI",56000],
+  ["012450","한화에어로스페이스","KOSPI",340000],["329180","HD현대중공업","KOSPI",210000],["034020","두산에너빌리티","KOSPI",21500],
+  ["051910","LG화학","KOSPI",305000],["006400","삼성SDI","KOSPI",295000],["259960","크래프톤","KOSPI",315000],
+  ["352820","하이브","KOSPI",225000],["009540","HD한국조선해양","KOSPI",185000],
+  ["247540","에코프로비엠","KOSDAQ",145000],["086520","에코프로","KOSDAQ",78000],["196170","알테오젠","KOSDAQ",315000],
+  ["028300","HLB","KOSDAQ",72000],["263750","펄어비스","KOSDAQ",34500],["293490","카카오게임즈","KOSDAQ",19800],
+  ["068760","셀트리온제약","KOSDAQ",92000],["058470","리노공업","KOSDAQ",178000],["277810","레인보우로보틱스","KOSDAQ",128000],
+  ["328130","루닛","KOSDAQ",42000],["035900","JYP Ent.","KOSDAQ",62000],["112040","위메이드","KOSDAQ",28500],
+  ["357780","솔브레인","KOSDAQ",265000],["005290","동진쎄미켐","KOSDAQ",38500],["240810","원익IPS","KOSDAQ",29500],
+  ["403870","HPSP","KOSDAQ",34000]
+];
+
+/* 🛠️ [수정됨] 3년 클릭 시 차트가 변하는 것을 테스트하기 위해 데모 데이터를 760일치로 늘림 */
+const DAYS = 760;
+function genStock([code,name,market,base]){
+  const rng = mulberry32(parseInt(code,10)+7);
+  const regime = rng();
+  const drift = regime<0.35 ? -0.0022 : regime<0.62 ? -0.0002 : regime<0.87 ? 0.0016 : 0.0032;
+  const vola  = 0.012 + rng()*0.02;
+  const open=[], high=[], low=[], close=[], vol=[];
+  let p = base*(0.85+rng()*0.3);
+  const baseVol = Math.round((3e9 + rng()*4e10)/base);
+  for(let i=0;i<DAYS;i++){
+    const o = i===0 ? p : close[i-1]*(1+(rng()-0.5)*0.012);
+    const shock = (rng()<0.045)?(rng()-0.35)*0.09:0;
+    p = Math.max(500, p*(1+drift+(rng()-0.5)*2*vola+shock));
+    const c = p;
+    const h = Math.max(o,c)*(1+rng()*0.012);
+    const l = Math.min(o,c)*(1-rng()*0.012);
+    open.push(o); high.push(h); low.push(l); close.push(c);
+    const vMul = 1+Math.abs(shock)*22+(rng()-0.5)*0.7;
+    vol.push(Math.max(1000, Math.round(baseVol*Math.max(0.2,vMul))));
+  }
+  if(rng()<0.4){ vol[DAYS-1]=Math.round(vol[DAYS-1]*(2.5+rng()*3)); close[DAYS-1]*=(1+rng()*0.05); high[DAYS-1]=Math.max(high[DAYS-1],close[DAYS-1]); }
+  return {code,name,market,open,high,low,close,vol};
+}
+
+/* 🛠️ [수정됨] 주봉/월봉 생성을 위한 리샘플링 함수 */
+function resampleSeries(s, interval) {
+  if (interval === "D") return s;
+  const chunkSize = interval === "W" ? 5 : 20; // 5거래일(1주), 20거래일(1개월) 대략 산정
+  const no = [], nh = [], nl = [], nc = [], nv = [];
+  const { o, h, l, c, v } = s;
+  for (let i = 0; i < c.length; i += chunkSize) {
+    const end = Math.min(i + chunkSize, c.length);
+    no.push(o[i]);
+    nc.push(c[end - 1]);
+    let maxH = -Infinity, minL = Infinity, sumV = 0;
+    for (let j = i; j < end; j++) {
+      if (h[j] > maxH) maxH = h[j];
+      if (l[j] < minL) minL = l[j];
+      sumV += v[j];
+    }
+    nh.push(maxH);
+    nl.push(minL);
+    nv.push(sumV);
+  }
+  return { o: no, h: nh, l: nl, c: nc, v: nv };
+}
+
+/* ── 지표 계산 엔진 ── */
+const sma=(a,n,i)=>{if(i<n-1)return null;let s=0;for(let k=i-n+1;k<=i;k++)s+=a[k];return s/n;};
+function smaArr(a,n){return a.map((_,i)=>sma(a,n,i));}
+function emaArr(a,n){const k=2/(n+1);let e=a[0];return a.map(v=>{e=v*k+e*(1-k);return e;});}
+function rsiArr(a,n=14){const out=[null];let g=0,l=0;
+  for(let i=1;i<a.length;i++){const d=a[i]-a[i-1];const up=Math.max(d,0),dn=Math.max(-d,0);
+    if(i<=n){g+=up;l+=dn;out.push(i===n?100-100/(1+(g/n)/((l/n)||1e-9)):null);}
+    else{g=(g*(n-1)/n)+up; l=(l*(n-1)/n)+dn; out.push(100-100/(1+(g)/((l)||1e-9)));}}
+  return out;}
+function hh(a,n,i){let m=-1e18;for(let k=Math.max(0,i-n+1);k<=i;k++)m=Math.max(m,a[k]);return m;}
+function ll(a,n,i){let m=1e18;for(let k=Math.max(0,i-n+1);k<=i;k++)m=Math.min(m,a[k]);return m;}
+
+function analyze(s){
+  const o=s.open, h=s.high, lo=s.low, c=s.close, v=s.vol;
+  const n=c.length, i=n-1;
+  const ma5=smaArr(c,5), ma20=smaArr(c,20), ma60=smaArr(c,60);
+  const e12=emaArr(c,12), e26=emaArr(c,26);
+  const macd=c.map((_,k)=>e12[k]-e26[k]);
+  const sig=emaArr(macd,9);
+  const hist=macd.map((m,k)=>m-sig[k]);
+  const rsi=rsiArr(c,14);
+  const stK=c.map((_,k)=>k<13?null:(c[k]-ll(lo,14,k))/((hh(h,14,k)-ll(lo,14,k))||1e-9)*100);
+  const bbMid=ma20[i];
+  let sd=0;{let s2=0;for(let k=i-19;k<=i;k++)s2+=(c[k]-bbMid)**2;sd=Math.sqrt(s2/20);}
+  const bbUp=bbMid+2*sd, bbLo=bbMid-2*sd, bbW=(bbUp-bbLo)/bbMid*100;
+  const bwHist=[];for(let k=Math.max(19,i-59);k<=i;k++){const m=sma(c,20,k);let s2=0;for(let q=k-19;q<=k;q++)s2+=(c[q]-m)**2;bwHist.push(4*Math.sqrt(s2/20)/m*100);}
+  const squeeze=bwHist.filter(x=>x<=bbW).length/bwHist.length<=0.2;
+  let obv=0;const obvA=[0];for(let k=1;k<n;k++){obv+=c[k]>c[k-1]?v[k]:c[k]<c[k-1]?-v[k]:0;obvA.push(obv);}
+  const tr=[h[0]-lo[0]];for(let k=1;k<n;k++)tr.push(Math.max(h[k]-lo[k],Math.abs(h[k]-c[k-1]),Math.abs(lo[k]-c[k-1])));
+  let atr=0;{let s0=0;for(let k=1;k<=14;k++)s0+=tr[k];atr=s0/14;for(let k=15;k<n;k++)atr=(atr*13+tr[k])/14;}
+  const atrPct=atr/c[i]*100;
+  let pdm=0,ndm=0,trs=0,pdiA=[],ndiA=[],dxA=[];
+  {let sp=0,sn=0,st=0;
+   for(let k=1;k<n;k++){
+     const up=h[k]-h[k-1], dn=lo[k-1]-lo[k];
+     const pd=(up>dn&&up>0)?up:0, nd=(dn>up&&dn>0)?dn:0;
+     if(k<=14){sp+=pd;sn+=nd;st+=tr[k];if(k===14){pdm=sp;ndm=sn;trs=st;}}
+     else{pdm=pdm-pdm/14+pd;ndm=ndm-ndm/14+nd;trs=trs-trs/14+tr[k];}
+     if(k>=14){const pdi=100*pdm/(trs||1e-9),ndi=100*ndm/(trs||1e-9);
+       pdiA.push(pdi);ndiA.push(ndi);dxA.push(100*Math.abs(pdi-ndi)/((pdi+ndi)||1e-9));}
+   }}
+  let adx=0;{let s0=0;for(let k=0;k<14;k++)s0+=dxA[k];adx=s0/14;for(let k=14;k<dxA.length;k++)adx=(adx*13+dxA[k])/14;}
+  const diPos=pdiA[pdiA.length-1], diNeg=ndiA[ndiA.length-1];
+  let psUp=c[1]>c[0], af=0.02, ep=psUp?h[1]:lo[1], sar=psUp?lo[0]:h[0];
+  for(let k=2;k<n;k++){
+    sar=sar+af*(ep-sar);
+    if(psUp){ if(lo[k]<sar){psUp=false;sar=ep;ep=lo[k];af=0.02;} else if(h[k]>ep){ep=h[k];af=Math.min(af+0.02,0.2);} }
+    else{ if(h[k]>sar){psUp=true;sar=ep;ep=h[k];af=0.02;} else if(lo[k]<ep){ep=lo[k];af=Math.min(af+0.02,0.2);} }
+  }
+  const psarUp=psUp;
+  const conv=(k)=> (hh(h,9,k)+ll(lo,9,k))/2;
+  const baseL=(k)=> (hh(h,26,k)+ll(lo,26,k))/2;
+  const spanA=(conv(i-26)+baseL(i-26))/2;
+  const spanB=(hh(h,52,i-26)+ll(lo,52,i-26))/2;
+  const cloudTop=Math.max(spanA,spanB);
+  const ichiAbove=c[i]>cloudTop;
+  const ichiTK=conv(i-1)<=baseL(i-1)&&conv(i)>baseL(i);
+  const tp=c.map((_,k)=>(h[k]+lo[k]+c[k])/3);
+  const cciAt=(k)=>{const m=sma(tp,20,k);let md=0;for(let q=k-19;q<=k;q++)md+=Math.abs(tp[q]-m);md/=20;return (tp[k]-m)/(0.015*(md||1e-9));};
+  const cci=cciAt(i), cciPrev=cciAt(i-1);
+  const wr=(hh(h,14,i)-c[i])/((hh(h,14,i)-ll(lo,14,i))||1e-9)*-100;
+  const roc=(c[i]/c[i-12]-1)*100;
+  let upV=0,dnV=0,eqV=0;for(let k=i-19;k<=i;k++){if(c[k]>c[k-1])upV+=v[k];else if(c[k]<c[k-1])dnV+=v[k];else eqV+=v[k];}
+  const vr=(upV+eqV/2)/Math.max(dnV+eqV/2,1e-9)*100;
+  let pmf=0,nmf=0;for(let k=i-13;k<=i;k++){const mf=tp[k]*v[k];if(tp[k]>tp[k-1])pmf+=mf;else if(tp[k]<tp[k-1])nmf+=mf;}
+  const mfi=100-100/(1+pmf/Math.max(nmf,1e-9));
+  const envUpLine=ma20[i]*1.06, envLoLine=ma20[i]*0.94;
+  const body=c[i]-o[i], rng2=Math.max(h[i]-lo[i],1e-9), bodyAbs=Math.abs(body);
+  const bigBull=body/o[i]>=0.03 && body/rng2>=0.6;
+  const lowSh=Math.min(o[i],c[i])-lo[i], upSh=h[i]-Math.max(o[i],c[i]);
+  const hammer=lowSh>=2*bodyAbs && upSh<=bodyAbs && c[i]<ma20[i];
+  const threeWhite=c[i]>o[i]&&c[i-1]>o[i-1]&&c[i-2]>o[i-2]&&c[i]>c[i-1]&&c[i-1]>c[i-2];
+  const risingLows=ll(lo,5,i)>ll(lo,5,i-5)&&ll(lo,5,i-5)>ll(lo,5,i-10);
+  const vAvg20=sma(v,20,i-1)||v[i];
+  const chg=(c[i]-c[i-1])/c[i-1]*100;
+  const chg5=(c[i]-c[i-5])/c[i-5]*100;
+  const hi120=hh(h,120,i), hi20prev=hh(h,20,i-1), lo120=ll(lo,120,i);
+  const amt=c[i]*v[i];
+  const disp20=c[i]/ma20[i]*100;
+  const boxWin=60;
+  const bStart=Math.max(0,i-boxWin+1);
+  const cSeg=c.slice(bStart,i+1), hSeg=h.slice(bStart,i+1), lSeg=lo.slice(bStart,i+1);
+  const bwHi=Math.max(...hSeg), bwLo=Math.min(...lSeg);
+  const boxRangePct=(bwHi-bwLo)/(bwLo||1e-9)*100;
+  const boxPos=(c[i]-bwLo)/((bwHi-bwLo)||1e-9)*100;
+  let boxSlopePct=0;
+  {const n2=cSeg.length;let sx=0,sy=0,sxy=0,sxx=0;
+   for(let k=0;k<n2;k++){const x=k,y=cSeg[k];sx+=x;sy+=y;sxy+=x*y;sxx+=x*x;}
+   const slope=(n2*sxy-sx*sy)/((n2*sxx-sx*sx)||1e-9);
+   boxSlopePct=slope/((sy/n2)||1e-9)*100;}
+  const flatness=(arr,top)=>{if(arr.length<10)return 100;
+    const srt=[...arr].sort((a,b)=>a-b);const k=Math.max(3,Math.floor(arr.length/5));
+    const band=top?srt.slice(-k):srt.slice(0,k);
+    const m=band.reduce((a,b)=>a+b,0)/band.length;
+    const sd=Math.sqrt(band.reduce((a,b)=>a+(b-m)**2,0)/band.length);
+    return sd/(Math.abs(m)||1e-9)*100;};
+  const boxFlatPct=Math.max(flatness(hSeg,true),flatness(lSeg,false));
+
+  return {
+    price:c[i], chg, chg5, amt, volRatio:v[i]/vAvg20,
+    ma5:ma5[i], ma20:ma20[i], ma60:ma60[i],
+    aligned: ma5[i]>ma20[i]&&ma20[i]>ma60[i],
+    reversed: ma5[i]<ma20[i]&&ma20[i]<ma60[i],
+    gcross: ma5[i-1]<=ma20[i-1]&&ma5[i]>ma20[i],
+    dcross: ma5[i-1]>=ma20[i-1]&&ma5[i]<ma20[i],
+    above20: c[i]>ma20[i]&&c[i-1]<=ma20[i-1],
+    on20: c[i]>ma20[i],
+    macdGC: macd[i-1]<=sig[i-1]&&macd[i]>sig[i],
+    histTurn: hist[i-1]<=0&&hist[i]>0,
+    rsi:rsi[i], stochK:stK[i],
+    stochRebound: stK[i-1]!=null&&stK[i-1]<25&&stK[i]>stK[i-1],
+    bbUp, bbLo, bbNearLo: c[i]<=bbLo*1.02, bbBreakUp: c[i]>bbUp,
+    squeeze, obvUp: obvA[i]>obvA[i-20],
+    near52: c[i]>=hi120*0.95, newHigh20: c[i]>hi20prev,
+    near52Low: c[i]<=lo120*1.05,
+    hi20prev, lo120, hi120,
+    disp20, adx, adxUpDir: diPos>diNeg, adxStrong: adx>=25&&diPos>diNeg,
+    psarUp, ichiAbove, ichiTK, cloudTop,
+    cci, cciBreak: cciPrev<=100&&cci>100, cciLow: cci<=-100,
+    wr, wrLow: wr<=-80,
+    roc, vr, vrLow: vr<=70, mfi, mfiLow: mfi<=20, mfiHigh: mfi>=80,
+    atrPct, envUpLine, envLoLine,
+    envLoNear: c[i]<=envLoLine*1.01, envUpBreak: c[i]>envUpLine,
+    bigBull, hammer, threeWhite, risingLows,
+    boxRangePct, boxPos, boxSlopePct, boxFlatPct, boxHi:bwHi, boxLo:bwLo,
+    spark: c.slice(-60)
+  };
+}
+
+/* ================================================================
+   3) 지표(필터) 카탈로그
+================================================================ */
+const CATS = [
+  {id:"trend", name:"추세", icon:"📈"},
+  {id:"momentum", name:"모멘텀", icon:"⚡"},
+  {id:"volume", name:"거래량", icon:"📊"},
+  {id:"volatility", name:"변동성", icon:"🌊"},
+  {id:"price", name:"가격", icon:"💰"},
+  {id:"supply", name:"수급", icon:"🏦"},
+  {id:"pattern", name:"패턴", icon:"🕯️"},
+  {id:"box", name:"박스권", icon:"📦"},
+];
+
+const INDICATORS = [
+  /* ── 추세 (13) ── */
+  {id:"aligned", cat:"trend", name:"정배열", desc:"5·20·60일선이 위에서 아래 순서로 정렬된, 상승 추세가 자리 잡은 종목을 찾아요.",
+    test:(a)=>a.aligned, why:(a)=>`5일선(${w(a.ma5)}) > 20일선(${w(a.ma20)}) > 60일선(${w(a.ma60)}) 정배열`},
+  {id:"reversed", cat:"trend", name:"역배열 (하락 추세)", desc:"이평선이 역순으로 정렬된 하락 추세 종목이에요. 제외 조건이나 역발상 탐색에 써요.",
+    test:(a)=>a.reversed, why:()=>`5<20<60일선 역배열 상태`},
+  {id:"gcross", cat:"trend", name:"골든크로스", desc:"5일선이 20일선을 오늘 상향 돌파한, 단기 추세 전환 시점의 종목을 찾아요.",
+    test:(a)=>a.gcross, why:()=>`5일선이 20일선을 당일 상향 돌파`},
+  {id:"dcross", cat:"trend", name:"데드크로스", desc:"5일선이 20일선을 오늘 하향 이탈한 종목이에요. 주의 관찰이나 제외 판단에 써요.",
+    test:(a)=>a.dcross, why:()=>`5일선이 20일선을 당일 하향 이탈`},
+  {id:"above20", cat:"trend", name:"20일선 상향 안착", desc:"종가가 오늘 20일선 위로 올라선 종목을 찾아요.",
+    test:(a)=>a.above20, why:(a)=>`종가가 20일선(${w(a.ma20)}) 위로 당일 안착`},
+  {id:"macdGC", cat:"trend", name:"MACD 골든크로스", desc:"MACD선이 시그널선을 상향 돌파한, 중기 모멘텀 전환 종목을 찾아요.",
+    test:(a)=>a.macdGC, why:()=>`MACD선이 시그널선을 상향 돌파`},
+  {id:"histTurn", cat:"trend", name:"MACD 히스토그램 양전환", desc:"MACD 히스토그램이 음(-)에서 양(+)으로 돌아선 종목을 찾아요.",
+    test:(a)=>a.histTurn, why:()=>`MACD 히스토그램 음→양 전환`},
+  {id:"adxStrong", cat:"trend", name:"ADX 상승 추세 강함", desc:"ADX가 기준 이상이면서 +DI가 우위인, 방향성이 뚜렷한 상승 추세 종목을 찾아요.", params:{th:{label:"ADX 기준", def:25, unit:""}},
+    test:(a,p)=>a.adx>=p.th&&a.adxUpDir, why:(a)=>`ADX ${a.adx.toFixed(1)} — 상승 방향 추세 강도 충분`},
+  {id:"psarUp", cat:"trend", name:"파라볼릭 SAR 상승 구간", desc:"SAR 점이 주가 아래에 있는, 상승 추세 유지 구간의 종목을 찾아요.",
+    test:(a)=>a.psarUp, why:()=>`파라볼릭 SAR 상승 구간 유지 중`},
+  {id:"ichiAbove", cat:"trend", name:"일목균형표 구름대 위", desc:"주가가 일목균형표 구름대 상단 위에 있는, 지지 기반이 확보된 종목을 찾아요.",
+    test:(a)=>a.ichiAbove, why:(a)=>`구름대 상단(${w(a.cloudTop)}) 위에서 거래 중`},
+  {id:"ichiTK", cat:"trend", name:"전환선·기준선 골든크로스", desc:"일목균형표 전환선이 기준선을 오늘 상향 돌파한 종목을 찾아요.",
+    test:(a)=>a.ichiTK, why:()=>`전환선이 기준선을 당일 상향 돌파`},
+  {id:"dispHigh", cat:"trend", name:"이격도 과열", desc:"주가가 20일선에서 기준 이상 벌어진 단기 과열 종목이에요. 주의 관찰용이에요.", params:{th:{label:"기준", def:105, unit:"%"}},
+    test:(a,p)=>a.disp20>=p.th, why:(a)=>`20일선 이격도 ${a.disp20.toFixed(1)}% — 과열권`},
+  {id:"dispLow", cat:"trend", name:"이격도 침체", desc:"주가가 20일선 아래로 기준 이하까지 내려온, 낙폭 과대 후보를 찾아요.", params:{th:{label:"기준", def:95, unit:"%"}},
+    test:(a,p)=>a.disp20<=p.th, why:(a)=>`20일선 이격도 ${a.disp20.toFixed(1)}% — 침체권`},
+
+  /* ── 모멘텀 (8) ── */
+  {id:"rsiLow", cat:"momentum", name:"RSI 과매도", desc:"RSI가 기준 이하로 내려간 과매도 구간 종목을 찾아요.", params:{th:{label:"기준", def:30, unit:""}},
+    test:(a,p)=>a.rsi!=null&&a.rsi<=p.th, why:(a)=>`RSI ${a.rsi.toFixed(1)} — 과매도 구간`},
+  {id:"rsiMid", cat:"momentum", name:"RSI 안정권", desc:"설정한 범위 안에 RSI가 있는, 과열도 침체도 아닌 종목을 찾아요.", params:{lo:{label:"하한", def:40, unit:""}, hi:{label:"상한", def:60, unit:""}},
+    test:(a,p)=>a.rsi!=null&&a.rsi>=p.lo&&a.rsi<=p.hi, why:(a)=>`RSI ${a.rsi.toFixed(1)} — 설정 안정권 내`},
+  {id:"rsiHigh", cat:"momentum", name:"RSI 과열", desc:"RSI가 기준 이상인 단기 과열 종목이에요. 주의 관찰이나 제외 판단에 써요.", params:{th:{label:"기준", def:70, unit:""}},
+    test:(a,p)=>a.rsi!=null&&a.rsi>=p.th, why:(a)=>`RSI ${a.rsi.toFixed(1)} — 과열 구간`},
+  {id:"stochRe", cat:"momentum", name:"스토캐스틱 저점 반등", desc:"%K가 25 이하 저점권에서 고개를 든 종목을 찾아요. (당일 이벤트형이라 기준 고정)",
+    test:(a)=>a.stochRebound, why:(a)=>`스토캐스틱 %K ${a.stochK.toFixed(1)} — 저점권 반등`},
+  {id:"cciBreak", cat:"momentum", name:"CCI +100 상향 돌파", desc:"CCI가 오늘 +100선을 넘어선, 상승 모멘텀 진입 종목을 찾아요. (당일 이벤트형)",
+    test:(a)=>a.cciBreak, why:(a)=>`CCI ${a.cci.toFixed(0)} — +100선 당일 상향 돌파`},
+  {id:"cciLow", cat:"momentum", name:"CCI 과매도", desc:"CCI가 기준 이하로 내려간 과매도 종목을 찾아요.", params:{th:{label:"기준", def:-100, unit:""}},
+    test:(a,p)=>a.cci<=p.th, why:(a)=>`CCI ${a.cci.toFixed(0)} — 과매도권`},
+  {id:"wrLow", cat:"momentum", name:"윌리엄스 %R 과매도", desc:"%R이 기준 이하인 단기 바닥권 종목을 찾아요.", params:{th:{label:"기준", def:-80, unit:""}},
+    test:(a,p)=>a.wr<=p.th, why:(a)=>`윌리엄스 %R ${a.wr.toFixed(1)} — 바닥권`},
+  {id:"rocHigh", cat:"momentum", name:"ROC 상승 모멘텀", desc:"12일 전 대비 가격 변화율이 기준 이상인 종목을 찾아요.", params:{th:{label:"기준", def:5, unit:"%"}},
+    test:(a,p)=>a.roc>=p.th, why:(a)=>`ROC(12) ${a.roc>=0?"+":""}${a.roc.toFixed(1)}% — 모멘텀 충족`},
+
+  /* ── 거래량 (6) ── */
+  {id:"volSurge", cat:"volume", name:"거래량 급증", desc:"당일 거래량이 20일 평균의 N배 이상인, 시장 관심이 몰린 종목을 찾아요.", params:{mul:{label:"배수", def:3, unit:"배"}},
+    test:(a,p)=>a.volRatio>=p.mul, why:(a)=>`거래량 20일 평균 대비 ${a.volRatio.toFixed(1)}배 급증`},
+  {id:"amtMin", cat:"volume", name:"거래대금 필터", desc:"당일 거래대금이 기준 이상인 종목만 남겨요. 유동성 낮은 종목 제거용이에요.", params:{eok:{label:"최소", def:50, unit:"억"}},
+    test:(a,p)=>a.amt>=p.eok*1e8, why:(a)=>`거래대금 ${eok(a.amt)} — 유동성 충족`},
+  {id:"obvUp", cat:"volume", name:"OBV 상승 추세", desc:"누적 거래량(OBV)이 20일 전보다 높은, 매집 흐름이 이어지는 종목을 찾아요.",
+    test:(a)=>a.obvUp, why:()=>`OBV가 20일 전 대비 상승 — 누적 매수 우위`},
+  {id:"vrLow", cat:"volume", name:"VR 바닥권", desc:"거래량 비율(VR)이 기준 이하로 내려간, 침체 후 반등 관찰 후보를 찾아요.", params:{th:{label:"기준", def:70, unit:""}},
+    test:(a,p)=>a.vr<=p.th, why:(a)=>`VR(20) ${a.vr.toFixed(0)} — 침체권`},
+  {id:"mfiLow", cat:"volume", name:"MFI 과매도", desc:"자금 흐름 지수(MFI)가 기준 이하인 과매도 종목을 찾아요.", params:{th:{label:"기준", def:20, unit:""}},
+    test:(a,p)=>a.mfi<=p.th, why:(a)=>`MFI ${a.mfi.toFixed(1)} — 자금 유출 과다권`},
+  {id:"mfiHigh", cat:"volume", name:"MFI 과열", desc:"MFI가 기준 이상인 자금 과열 종목이에요. 주의 관찰용이에요.", params:{th:{label:"기준", def:80, unit:""}},
+    test:(a,p)=>a.mfi>=p.th, why:(a)=>`MFI ${a.mfi.toFixed(1)} — 자금 유입 과열권`},
+
+  /* ── 변동성 (6) ── */
+  {id:"bbLo", cat:"volatility", name:"볼린저밴드 하단 근접", desc:"주가가 밴드 하단에서 설정 % 이내까지 내려온 종목을 찾아요.", params:{pct:{label:"근접", def:2, unit:"%"}},
+    test:(a,p)=>a.price<=a.bbLo*(1+p.pct/100), why:(a)=>`볼린저 하단(${w(a.bbLo)}) 근접`},
+  {id:"bbUp", cat:"volatility", name:"볼린저밴드 상단 돌파", desc:"주가가 밴드 상단을 넘어선 강한 흐름의 종목을 찾아요.",
+    test:(a)=>a.bbBreakUp, why:(a)=>`볼린저 상단(${w(a.bbUp)}) 돌파`},
+  {id:"squeeze", cat:"volatility", name:"밴드 스퀴즈", desc:"밴드폭이 최근 60일 중 하위 20% 수준으로 좁아진, 변동성 축소 구간 종목을 찾아요.",
+    test:(a)=>a.squeeze, why:()=>`밴드폭 60일 하위 20% — 변동성 축소 구간`},
+  {id:"atrHigh", cat:"volatility", name:"ATR 변동성 확대", desc:"일평균 변동폭(ATR)이 주가 대비 기준 이상인, 움직임이 큰 종목을 찾아요.", params:{th:{label:"기준", def:4, unit:"%"}},
+    test:(a,p)=>a.atrPct>=p.th, why:(a)=>`ATR ${a.atrPct.toFixed(1)}% — 변동폭 확대 구간`},
+  {id:"envLo", cat:"volatility", name:"엔벨로프 하단 근접", desc:"20일선 기준 설정한 폭(%)의 엔벨로프 하단까지 내려온 종목을 찾아요. 밴드 폭도 직접 정할 수 있어요.", params:{band:{label:"밴드폭", def:6, unit:"%"}, near:{label:"근접", def:1, unit:"%"}},
+    test:(a,p)=>a.price<=a.ma20*(1-p.band/100)*(1+p.near/100), why:(a)=>`엔벨로프 하단 근접 (20일선 ${w(a.ma20)} 기준)`},
+  {id:"envUp", cat:"volatility", name:"엔벨로프 상단 돌파", desc:"20일선 기준 설정한 폭(%)의 엔벨로프 상단을 넘어선 종목을 찾아요.", params:{band:{label:"밴드폭", def:6, unit:"%"}},
+    test:(a,p)=>a.price>a.ma20*(1+p.band/100), why:(a)=>`엔벨로프 상단 돌파 (20일선 ${w(a.ma20)} 기준)`},
+
+  /* ── 가격 (6) ── */
+  {id:"priceRange", cat:"price", name:"가격대 범위", desc:"설정한 최소~최대 가격 사이의 종목만 남겨요.", params:{min:{label:"최소", def:5000, unit:"원"}, max:{label:"최대", def:500000, unit:"원"}},
+    test:(a,p)=>a.price>=p.min&&a.price<=p.max, why:(a)=>`현재가 ${w(a.price)} — 설정 범위 내`},
+  {id:"chgUp", cat:"price", name:"당일 등락률 이상", desc:"당일 등락률이 기준 이상인 종목을 찾아요.", params:{th:{label:"기준", def:3, unit:"%"}},
+    test:(a,p)=>a.chg>=p.th, why:(a)=>`당일 ${a.chg>=0?"+":""}${a.chg.toFixed(2)}% 상승`},
+  {id:"chgUp5", cat:"price", name:"5일 등락률 이상", desc:"최근 5거래일 누적 등락률이 기준 이상인 종목을 찾아요.", params:{th:{label:"기준", def:10, unit:"%"}},
+    test:(a,p)=>a.chg5>=p.th, why:(a)=>`5일 누적 ${a.chg5>=0?"+":""}${a.chg5.toFixed(1)}%`},
+  {id:"near52", cat:"price", name:"신고가 근접", desc:"최근 120일 최고가 대비 설정 % 이내까지 올라온 종목을 찾아요.", params:{pct:{label:"이내", def:5, unit:"%"}},
+    test:(a,p)=>a.price>=a.hi120*(1-p.pct/100), why:(a)=>`120일 최고가(${w(a.hi120)}) 근접`},
+  {id:"newHigh20", cat:"price", name:"20일 신고가 갱신", desc:"오늘 종가가 직전 20일 최고가를 넘어선 종목을 찾아요.",
+    test:(a)=>a.newHigh20, why:(a)=>`직전 20일 고점(${w(a.hi20prev)}) 갱신`},
+  {id:"near52Low", cat:"price", name:"신저가 근접", desc:"최근 120일 최저가의 설정 % 이내까지 내려온 종목이에요. 낙폭 과대 관찰이나 제외 판단에 써요.", params:{pct:{label:"이내", def:5, unit:"%"}},
+    test:(a,p)=>a.price<=a.lo120*(1+p.pct/100), why:(a)=>`120일 최저가(${w(a.lo120)}) 근접`},
+
+  /* ── 수급 (2) ── */
+  {id:"frgBuy120", cat:"supply", name:"외국인 120일 순매수 우위", desc:"최근 120거래일 외국인 순매수 합계가 (+)인 종목을 찾아요. 기간 합계 최소 금액도 정할 수 있어요.", params:{minEok:{label:"120일 합계 최소", def:0, unit:"억"}},
+    test:(a,p)=>((a.frgNet120!=null?a.frgNet120:a.frgNet3)||0)>0&&((a.frgNet120!=null?a.frgNet120:a.frgNet3)||0)>=(p.minEok||0)*1e8, why:(a)=>{const v=a.frgNet120!=null?a.frgNet120:a.frgNet3;return `외국인 120일 순매수 우위${v?` — 합계 ${eok(v)}`:""}`;}},
+  {id:"instBuy120", cat:"supply", name:"기관 120일 순매수 우위", desc:"최근 120거래일 기관 순매수 합계가 (+)인 종목을 찾아요. 기간 합계 최소 금액도 정할 수 있어요.", params:{minEok:{label:"120일 합계 최소", def:0, unit:"억"}},
+    test:(a,p)=>((a.instNet120!=null?a.instNet120:a.instNet3)||0)>0&&((a.instNet120!=null?a.instNet120:a.instNet3)||0)>=(p.minEok||0)*1e8, why:(a)=>{const v=a.instNet120!=null?a.instNet120:a.instNet3;return `기관 120일 순매수 우위${v?` — 합계 ${eok(v)}`:""}`;}},
+  {id:"frgDays", cat:"supply", name:"외국인 순매수 일수", desc:"120거래일 중 외국인이 순매수한 날이 기준 이상인, 꾸준히 사들인 종목을 찾아요.", params:{th:{label:"기준 일수", def:60, unit:"일"}},
+    test:(a,p)=>(a.frgDays120||0)>=p.th, why:(a)=>`외국인 120일 중 ${a.frgDays120||0}일 순매수`},
+  {id:"instDays", cat:"supply", name:"기관 순매수 일수", desc:"120거래일 중 기관이 순매수한 날이 기준 이상인, 꾸준히 사들인 종목을 찾아요.", params:{th:{label:"기준 일수", def:60, unit:"일"}},
+    test:(a,p)=>(a.instDays120||0)>=p.th, why:(a)=>`기관 120일 중 ${a.instDays120||0}일 순매수`},
+
+  /* ── 패턴 (4) ── */
+  {id:"bigBull", cat:"pattern", name:"장대양봉", desc:"몸통이 시가 대비 3% 이상이고 캔들 대부분을 차지하는 강한 양봉 종목을 찾아요.",
+    test:(a)=>a.bigBull, why:()=>`당일 장대양봉 출현 (몸통 3% 이상)`},
+  {id:"hammer", cat:"pattern", name:"망치형 캔들", desc:"긴 아래꼬리를 단 반등 신호 후보 캔들이 하락 구간에서 나온 종목을 찾아요.",
+    test:(a)=>a.hammer, why:()=>`하락 구간에서 망치형 캔들 출현`},
+  {id:"threeWhite", cat:"pattern", name:"적삼병 (3연속 양봉)", desc:"3거래일 연속 양봉이며 종가가 계단식으로 높아진 종목을 찾아요.",
+    test:(a)=>a.threeWhite, why:()=>`3일 연속 양봉 + 종가 계단식 상승`},
+  {id:"risingLows", cat:"pattern", name:"저점 높이기", desc:"최근 15일간 5일 단위 저가가 계단식으로 높아진, 상승 추세선 형성 종목을 찾아요.",
+    test:(a)=>a.risingLows, why:()=>`5일 단위 저가 3연속 상승 — 지지선 우상향`},
+
+  /* ── 박스권 (3) ── */
+  {id:"boxRange", cat:"box", name:"박스권 (횡보)", desc:"최근 60일 고저 범위가 좁고(박스폭), 천장·바닥이 수평이며(지지·저항선), 추세 기울기가 완만한 진짜 횡보 종목을 찾아요. 다른 조건과 겹쳐 쓰기 좋아요.", params:{width:{label:"박스폭 최대", def:30, unit:"%"}, flat:{label:"수평성 이내", def:4, unit:"%"}, slope:{label:"기울기 이내", def:0.2, unit:"%/일"}},
+    test:(a,p)=>a.boxRangePct!=null&&a.boxRangePct<=p.width&&(a.boxFlatPct!=null?a.boxFlatPct:99)<=p.flat&&Math.abs(a.boxSlopePct||0)<=p.slope, why:(a)=>`박스폭 ${a.boxRangePct.toFixed(1)}% · 수평성 ${(a.boxFlatPct||0).toFixed(1)}% · 기울기 ${Math.abs(a.boxSlopePct||0).toFixed(2)}%/일 — 박스권`},
+  {id:"boxBottom", cat:"box", name:"박스권 하단", desc:"박스권 종목 중 현재가가 지지선(바닥) 쪽에 있는 종목을 찾아요. 저점 매수 관찰용이에요.", params:{width:{label:"박스폭 최대", def:30, unit:"%"}, flat:{label:"수평성 이내", def:4, unit:"%"}, slope:{label:"기울기 이내", def:0.2, unit:"%/일"}, pos:{label:"위치 이하", def:30, unit:"%"}},
+    test:(a,p)=>a.boxRangePct!=null&&a.boxRangePct<=p.width&&(a.boxFlatPct!=null?a.boxFlatPct:99)<=p.flat&&Math.abs(a.boxSlopePct||0)<=p.slope&&a.boxPos<=p.pos, why:(a)=>`박스 내 위치 ${a.boxPos.toFixed(0)}% (0=지지선) — 하단권`},
+  {id:"boxTop", cat:"box", name:"박스권 상단", desc:"박스권 종목 중 현재가가 저항선(천장) 쪽에 있는 종목을 찾아요. 돌파 임박 관찰용이에요.", params:{width:{label:"박스폭 최대", def:30, unit:"%"}, flat:{label:"수평성 이내", def:4, unit:"%"}, slope:{label:"기울기 이내", def:0.2, unit:"%/일"}, pos:{label:"위치 이상", def:70, unit:"%"}},
+    test:(a,p)=>a.boxRangePct!=null&&a.boxRangePct<=p.width&&(a.boxFlatPct!=null?a.boxFlatPct:99)<=p.flat&&Math.abs(a.boxSlopePct||0)<=p.slope&&a.boxPos>=p.pos, why:(a)=>`박스 내 위치 ${a.boxPos.toFixed(0)}% (100=저항선) — 상단권`},
+];
+
+/* ── 나만의 조건 빌더 ── */
+const BOX_PRESETS = [
+  {key:"tight",  name:"좁고 확실한 박스", memo:"뚜렷하게 갇혀서 오가는 종목만", vals:{width:18, flat:2.5, slope:0.1}},
+  {key:"normal", name:"보통 박스",       memo:"적당히 횡보하는 종목까지",     vals:{width:30, flat:4,   slope:0.2}},
+  {key:"wide",   name:"넓게 잡기",       memo:"살짝 기울어도 폭넓게 포함",     vals:{width:45, flat:7,   slope:0.35}},
+];
+function explainBoxWidth(v){
+  if(v==null||!isFinite(v)) return "";
+  const lvl = v<=20?"꽤 좁은":v<=32?"적당한":"다소 넉넉한";
+  return `최근 60일 동안 최고가와 최저가 차이가 ${v}% 이내라는 뜻이에요. ${lvl} 폭이에요. 예를 들어 10,000원짜리 주식이면 최저가·최고가가 그 범위 안에서만 움직였다는 의미예요. 숫자가 작을수록 더 좁고 답답한 횡보만, 클수록 좀 더 출렁여도 박스권으로 봐줘요.`;
+}
+function explainBoxFlat(v){
+  if(v==null||!isFinite(v)) return "";
+  const lvl = v<=3?"거의 일직선으로 맞아떨어지는":v<=5.5?"어느 정도 들쭉날쭉해도 괜찮은":"꽤 들쭉날쭉해도 인정하는";
+  return `천장(최근 고점들)과 바닥(최근 저점들)이 서로 얼마나 가지런한지를 봐요. ${lvl} 기준이에요. 값이 작을수록 고점끼리, 저점끼리 높이가 딱 맞는 깔끔한 박스만 골라요. 값이 크면 저항선·지지선이 살짝 삐뚤어져 있어도 봐줘요.`;
+}
+function explainBoxSlope(v){
+  if(v==null||!isFinite(v)) return "";
+  const lvl = v<=0.12?"거의 완전히 옆으로 가는":v<=0.25?"살짝 기울어도 되는":"제법 기울어도 되는";
+  return `하루 평균 몇 % 씩 오르내리는 추세인지를 봐요. ${lvl} 기준이에요. 0에 가까울수록 위아래로만 왔다갔다 하는 순수 횡보만, 값이 크면 아주 완만한 상승·하락 추세도 박스권에 포함해요.`;
+}
+function explainBoxPos(v,mode){
+  if(v==null||!isFinite(v)) return "";
+  if(mode==="low") return `박스 안에서 지금 가격 위치가 0(바닥·지지선)~100(천장·저항선) 중 ${v} 이하인 종목만 찾아요. 즉 박스 밑에서부터 ${v}% 높이 안에 있는, 바닥 가까이 내려온 종목이에요.`;
+  return `박스 안에서 지금 가격 위치가 0(바닥·지지선)~100(천장·저항선) 중 ${v} 이상인 종목만 찾아요. 즉 박스 천장 가까이 올라와서, 위쪽 저항선을 곧 시험할 수 있는 종목이에요.`;
+}
+
+const METRICS=[
+  ["price","현재가","원",(a)=>a.price],
+  ["chg","당일 등락률","%",(a)=>a.chg],
+  ["chg5","5일 등락률","%",(a)=>a.chg5],
+  ["amt","거래대금","억",(a)=>a.amt/1e8],
+  ["volRatio","거래량 배수(20일 평균 대비)","배",(a)=>a.volRatio],
+  ["rsi","RSI(14)","",(a)=>a.rsi],
+  ["stochK","스토캐스틱 %K","",(a)=>a.stochK],
+  ["cci","CCI(20)","",(a)=>a.cci],
+  ["wr","윌리엄스 %R","",(a)=>a.wr],
+  ["roc","ROC(12)","%",(a)=>a.roc],
+  ["vr","VR(20)","",(a)=>a.vr],
+  ["mfi","MFI(14)","",(a)=>a.mfi],
+  ["adx","ADX(14)","",(a)=>a.adx],
+  ["disp20","20일선 이격도","%",(a)=>a.disp20],
+  ["atrPct","ATR 변동폭","%",(a)=>a.atrPct],
+  ["pctB","볼린저 %B 위치(0=하단 100=상단)","%",(a)=>(a.bbUp!=null&&a.bbLo!=null)?(a.price-a.bbLo)/((a.bbUp-a.bbLo)||1e-9)*100:null],
+  ["hiGap","120일 최고가와의 거리","%",(a)=>a.hi120?(1-a.price/a.hi120)*100:null],
+  ["loGap","120일 최저가 대비 상승폭","%",(a)=>a.lo120?(a.price/a.lo120-1)*100:null],
+  ["frgNet120","외국인 120일 순매수 합","억",(a)=>((a.frgNet120!=null?a.frgNet120:a.frgNet3)||0)/1e8],
+  ["instNet120","기관 120일 순매수 합","억",(a)=>((a.instNet120!=null?a.instNet120:a.instNet3)||0)/1e8],
+  ["frgDays120","외국인 순매수 일수(120일 중)","일",(a)=>a.frgDays120||0],
+  ["instDays120","기관 순매수 일수(120일 중)","일",(a)=>a.instDays120||0],
+  ["boxRangePct","박스폭(60일 고저 범위)","%",(a)=>a.boxRangePct],
+  ["boxPos","박스 내 위치(0=바닥 100=천장)","%",(a)=>a.boxPos],
+  ["boxSlopePct","추세 기울기(하루당)","%",(a)=>a.boxSlopePct],
+  ["boxFlatPct","박스 수평성(낮을수록 평평)","%",(a)=>a.boxFlatPct],
+];
+const OP_LABEL={ge:"이상",le:"이하",bt:"범위"};
+function testCustom(a, cc){
+  const m=METRICS.find(x=>x[0]===cc.metric); if(!m) return true;
+  const v=m[3](a); if(v==null||!isFinite(v)) return false;
+  if(cc.op==="ge") return v>=cc.v1;
+  if(cc.op==="le") return v<=cc.v1;
+  return v>=Math.min(cc.v1,cc.v2)&&v<=Math.max(cc.v1,cc.v2);
+}
+
+const PRESETS = [
+  {name:"🚀 돌파형", ids:["volSurge","near52","aligned"], memo:"거래량 급증 + 신고가 근접 + 정배열"},
+  {name:"🎯 눌림목형", ids:["aligned","rsiMid","amtMin"], memo:"정배열 유지 + RSI 안정권 + 유동성 확보"},
+  {name:"🔄 바닥 반등형", ids:["bbLo","stochRe"], memo:"볼린저 하단 근접 + 스토캐스틱 저점 반등"},
+];
+
+/* ================================================================
+   3.5) 채팅 조건 검색
+================================================================ */
+const GEMINI_KEY_LS = "stockcatcher_gemini_key_v1";
+const GEMINI_MODELS = ["gemini-3-flash","gemini-3.1-flash-lite","gemini-2.5-flash-lite"];
+
+function parseRules(text){
+  const t = text.replace(/\s+/g," ").toLowerCase();
+  const sel = {}, params = {}, custom = [];
+  const num = (re)=>{const m=t.match(re); return m?parseFloat(m[1]):null;};
+  const has = (...ks)=>ks.some(k=>t.includes(k));
+  const on = (id,p)=>{sel[id]=true; if(p)params[id]={...(params[id]||{}),...p};};
+
+  // 추세
+  if(has("정배열")) on("aligned");
+  if(has("역배열")) on("reversed");
+  if(has("골든크로스","골든 크로스")&&!has("macd")) on("gcross");
+  if(has("데드크로스","데드 크로스")) on("dcross");
+  if(has("20일선 위","20일선 안착","20일선 돌파")) on("above20");
+  if(has("macd")&&has("골든")) on("macdGC");
+  if(has("macd")&&has("히스토그램","양전환")) on("histTurn");
+  if(has("adx")||has("추세 강","강한 추세")){const v=num(/adx\s*(\d+)/); on("adxStrong", v?{th:v}:null);}
+  if(has("sar","파라볼릭")) on("psarUp");
+  if(has("일목","구름")) on("ichiAbove");
+  if(has("전환선","기준선")) on("ichiTK");
+  {const v=num(/이격도\s*(\d+)\s*이상/); if(v!=null||has("이격 과열")) on("dispHigh", v?{th:v}:null);}
+  {const v=num(/이격도\s*(\d+)\s*이하/); if(v!=null||has("이격 침체","낙폭")) on("dispLow", v?{th:v}:null);}
+
+  // 모멘텀
+  {const v=num(/rsi\s*(\d+)\s*(?:이하|아래|밑|미만)/); if(v!=null) on("rsiLow",{th:v}); else if(has("과매도")&&has("rsi")) on("rsiLow");}
+  {const v=num(/rsi\s*(\d+)\s*(?:이상|위|초과)/); if(v!=null) on("rsiHigh",{th:v}); else if(has("과열")&&has("rsi")) on("rsiHigh");}
+  if((has("rsi")&&has("안정","중립"))) on("rsiMid");
+  if(has("스토캐스틱","스토케스틱")&&has("반등","저점")) on("stochRe");
+  if(has("cci")&&has("돌파")) on("cciBreak");
+  if(has("cci")&&has("과매도")) on("cciLow");
+  if(has("윌리엄스","%r","williams")) on("wrLow");
+  {const v=num(/roc\s*(\d+)/); if(v!=null||has("roc")) on("rocHigh", v?{th:v}:null);}
+
+  // 거래량
+  {const v=num(/거래량\s*(\d+(?:\.\d+)?)\s*배/); if(v!=null) on("volSurge",{mul:v}); else if(has("거래량 급증","거래량 폭발","거래량 증가")) on("volSurge");}
+  {const v=num(/거래대금\s*(\d+)\s*억/); if(v!=null) on("amtMin",{eok:v}); else if(has("거래대금")) on("amtMin");}
+  if(has("obv","매집")) on("obvUp");
+  if(has("vr")&&has("바닥")) on("vrLow");
+  if(has("mfi")&&has("과매도")) on("mfiLow");
+  if(has("mfi")&&has("과열")) on("mfiHigh");
+
+  // 변동성
+  if(has("볼린저")&&has("하단")) on("bbLo");
+  if(has("볼린저")&&has("상단","돌파")) on("bbUp");
+  if(has("스퀴즈","밴드 축소","변동성 축소")) on("squeeze");
+  {const v=num(/atr\s*(\d+)/); if(v!=null||has("atr","변동성 확대")) on("atrHigh", v?{th:v}:null);}
+  if(has("엔벨로프")&&has("하단")) on("envLo");
+  if(has("엔벨로프")&&has("상단")) on("envUp");
+
+  // 가격
+  {const mn=num(/(\d[\d,]*)\s*원?\s*(?:이상|부터|~)/); const mx=num(/(\d[\d,]*)\s*원?\s*(?:이하|까지|미만)/);
+   if((mn!=null||mx!=null)&&has("가격","원")) on("priceRange", {...(mn!=null?{min:mn}:{}),...(mx!=null?{max:mx}:{})});}
+  {const v=num(/(?:당일|오늘)?\s*(\d+)\s*%\s*(?:이상|넘|초과)/); if(v!=null&&has("등락","상승")) on("chgUp",{th:v});}
+  {const v=num(/5일\s*(\d+)\s*%/); if(v!=null) on("chgUp5",{th:v});}
+  if(has("신고가")&&!has("신저가")){const v=num(/신고가\s*(\d+)\s*%/); on("near52", v?{pct:v}:null);}
+  if(has("20일 신고가","20일 최고")) on("newHigh20");
+  if(has("신저가")){const v=num(/신저가\s*(\d+)\s*%/); on("near52Low", v?{pct:v}:null);}
+
+  // 수급 (120일)
+  if(has("외국인")&&has("순매수","매수")){const v=num(/외국인.*?(\d+)\s*억/); on("frgBuy120", v?{minEok:v}:null);
+    const d=num(/외국인.*?(\d+)\s*일\s*(?:이상|넘|초과)/); if(d!=null&&d<120) on("frgDays",{th:d});}
+  if(has("기관")&&has("순매수","매수")){const v=num(/기관.*?(\d+)\s*억/); on("instBuy120", v?{minEok:v}:null);
+    const d=num(/기관.*?(\d+)\s*일\s*(?:이상|넘|초과)/); if(d!=null&&d<120) on("instDays",{th:d});}
+
+  // 박스권
+  if(has("박스권","횡보","박스 구간","박스권 종목")){
+    const w=num(/박스\s*(\d+)\s*%/); const p={}; if(w!=null)p.width=w;
+    if(has("하단","바닥")) on("boxBottom",p);
+    else if(has("상단","천장","돌파")) on("boxTop",p);
+    else on("boxRange", Object.keys(p).length?p:null);
+  }
+
+  // 패턴
+  if(has("장대양봉")) on("bigBull");
+  if(has("망치","해머")) on("hammer");
+  if(has("적삼병")) on("threeWhite");
+  if(has("저점 높이","지지선 상승")) on("risingLows");
+
+  return {sel, params, custom, matched: Object.keys(sel).length+custom.length};
+}
+
+async function parseGemini(text, key){
+  const catalog = INDICATORS.map(d=>{
+    const ps = d.params?` params:{${Object.entries(d.params).map(([k,v])=>`${k}(기본${v.def}${v.unit})`).join(",")}}`:"";
+    return `${d.id}: ${d.name}${ps}`;
+  }).join("\n");
+  const metricList = METRICS.map(m=>`${m[0]}: ${m[1]} (${m[2]})`).join("\n");
+  const sys = `너는 한국 주식 스크리너의 조건 변환기다. 사용자의 자연어 요청을 아래 지표로 변환해 JSON만 출력한다.
+[지표 목록 - sel에 사용]
+${catalog}
+[수치 지표 - custom에 사용]
+${metricList}
+출력 형식(JSON만, 설명 금지):
+{"sel":["지표id",...],"params":{"지표id":{"파라미터명":값}},"custom":[{"metric":"수치지표id","op":"ge|le|bt","v1":값,"v2":값또는null}]}
+규칙: 요청에 맞는 지표만 넣는다. 파라미터 언급 없으면 params 생략. 범위는 op:bt. 확실치 않으면 넣지 않는다.`;
+  for(const model of GEMINI_MODELS){
+    try{
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          systemInstruction:{parts:[{text:sys}]},
+          contents:[{parts:[{text:text}]}],
+          generationConfig:{temperature:0, responseMimeType:"application/json"}
+        })
+      });
+      if(!res.ok) continue;
+      const j = await res.json();
+      const txt = j?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if(!txt) continue;
+      const parsed = JSON.parse(txt.replace(/```json|```/g,"").trim());
+      const sel={}, params={};
+      (parsed.sel||[]).forEach(id=>{ if(INDICATORS.some(d=>d.id===id)) sel[id]=true; });
+      Object.entries(parsed.params||{}).forEach(([id,pv])=>{ if(sel[id]) params[id]=pv; });
+      const custom=(parsed.custom||[]).filter(c=>METRICS.some(m=>m[0]===c.metric)&&isFinite(c.v1));
+      return {sel, params, custom, model, matched:Object.keys(sel).length+custom.length};
+    }catch(e){ continue; }
+  }
+  throw new Error("Gemini 응답 실패");
+}
+
+/* ================================================================
+   4) 스코어링 엔진
+================================================================ */
+const SCORE_RULES = [
+  {id:"aligned", pts:15, label:"이평선 정배열"},
+  {id:"gcross", pts:12, label:"5/20 골든크로스"},
+  {id:"macdGC", pts:12, label:"MACD 골든크로스"},
+  {id:"histTurn", pts:8, label:"MACD 히스토그램 양전환"},
+  {id:"volSurgeS", pts:15, label:"거래량 3배 이상 급증", test:(a)=>a.volRatio>=3, why:(a)=>`거래량 ${a.volRatio.toFixed(1)}배 급증`},
+  {id:"obvUp", pts:8, label:"OBV 상승 추세"},
+  {id:"rsiMid", pts:10, label:"RSI 안정권(40~60)"},
+  {id:"near52", pts:12, label:"신고가 근접"},
+  {id:"newHigh20", pts:10, label:"20일 신고가 갱신"},
+  {id:"squeeze", pts:6, label:"밴드 스퀴즈"},
+  {id:"stochRe", pts:6, label:"스토캐스틱 저점 반등"},
+  {id:"frgBuy120", pts:10, label:"외국인 120일 순매수 우위"},
+  {id:"instBuy120", pts:8, label:"기관 120일 순매수 우위"},
+  {id:"adxStrong", pts:8, label:"ADX 상승 추세 강함"},
+  {id:"ichiAbove", pts:8, label:"일목균형표 구름대 위"},
+  {id:"bigBull", pts:6, label:"장대양봉"},
+  {id:"risingLows", pts:8, label:"저점 높이기"},
+];
+const PENALTIES = [
+  {pts:-15, label:"RSI 75 이상 단기 과열", test:(a)=>a.rsi>=75, why:(a)=>`RSI ${a.rsi.toFixed(1)} 과열 — 추격 부담 구간`},
+  {pts:-20, label:"거래대금 30억 미만", test:(a)=>a.amt<3e9, why:(a)=>`거래대금 ${eok(a.amt)} — 유동성 부족`},
+  {pts:-12, label:"5일간 30% 이상 급등", test:(a)=>a.chg5>=30, why:(a)=>`5일 수익률 +${a.chg5.toFixed(1)}% — 단기 급등 부담`},
+  {pts:-10, label:"이평선 역배열", test:(a)=>a.reversed, why:()=>`역배열 — 하락 추세 미해소`},
+];
+function scoreStock(a){
+  const hits=[], warns=[]; let score=0;
+  const ind = Object.fromEntries(INDICATORS.map(d=>[d.id,d]));
+  SCORE_RULES.forEach(r=>{
+    const ok = r.test ? r.test(a) : (ind[r.id]&&ind[r.id].test(a, defParams(ind[r.id])));
+    if(ok){score+=r.pts; hits.push({label:r.label, pts:r.pts, why: r.why? r.why(a) : (ind[r.id]&&ind[r.id].why? ind[r.id].why(a): r.label)});}
+  });
+  PENALTIES.forEach(r=>{ if(r.test(a)){score+=r.pts; warns.push({label:r.label, pts:r.pts, why:r.why(a)});} });
+  const grade = score>=60?"S":score>=45?"A":score>=30?"B":"C";
+  return {score:Math.max(0,score), grade, hits, warns};
+}
+function defParams(d){ if(!d.params) return {}; return Object.fromEntries(Object.entries(d.params).map(([k,v])=>[k,v.def])); }
+
+const w = (n)=> n==null?"-":"₩"+Math.round(n).toLocaleString();
+const eok = (won)=> (won/1e8).toFixed(won>=1e10?0:1)+"억";
+const pct = (n)=> (n>=0?"+":"")+n.toFixed(2)+"%";
+const cc = (n)=> n>0?"var(--up)":n<0?"var(--down)":"var(--tx2)";
+
+function Spark({data, w2=96, h=30}){
+  const min=Math.min(...data), max=Math.max(...data);
+  const pts=data.map((v,i)=>`${(i/(data.length-1)*w2).toFixed(1)},${(h-2-(v-min)/((max-min)||1)*(h-4)).toFixed(1)}`).join(" ");
+  const up = data[data.length-1]>=data[0];
+  return <svg width={w2} height={h} className="block"><polyline points={pts} fill="none" stroke={up?"var(--up)":"var(--down)"} strokeWidth="1.5" opacity="0.9"/></svg>;
+}
+
+/* ================================================================
+   풀 차트 (캔들 + 오버레이 5종 + 보조차트 12종)
+================================================================ */
+const CHART_OPT_KEY="stockcatcher_chartopts_v1";
+const DRAW_KEY="stockcatcher_draw_v1";
+
+/* 🛠️ [수정됨] 박스권 3단계 버튼 분리 */
+const OVERLAYS=[
+  ["ma","이평선"],
+  ["box1","박스(상/하)"],
+  ["box2","박스(2등분)"],
+  ["box3","박스(3등분)"],
+  ["bb","볼린저"],
+  ["env","엔벨로프"],
+  ["ichi","일목구름"],
+  ["sar","SAR"]
+];
+
+const SUBS=[
+  ["vol","거래량"],
+  ["macd","MACD (추세방향)"],
+  ["rsi","RSI (매수/매도 과열)"],
+  ["stoch","스토캐스틱 (단기파동)"],
+  ["cci","CCI (추세이탈도)"],
+  ["mfi","MFI (자금흐름)"],
+  ["adx","ADX/DMI"],
+  ["obv","OBV (세력 누적매집량)"],
+  ["atr","ATR%"],
+  ["wr","윌리엄스 %R"],
+  ["roc","ROC"],
+  ["vr","VR"]
+];
+
+const MA_COLORS=["#E8B04B","#6FA8FF","#B18CFF","#4CC38A","#FF8A65","#FF6F91","#5BC8D9","#F0A0C0"];
+const MA_MAX=8;
+/* 🛠️ [수정됨] 기본 오버레이 설정 변경 (박스는 3등분을 기본으로 함) */
+const defChartOpts=()=>({ov:{ma:true, box1:false, box2:false, box3:true, bb:false, env:false, ichi:false, sar:false}, sub:Object.fromEntries(SUBS.map(([k])=>[k,true])), maPeriods:[5,20,60]});
+
+/* 🛠️ [수정됨] VOL17에서 누락되어 있던 지표 계산 함수 복원 (VOL15 원본과 동일) */
+function calcSeries(o,h,l,c,v){
+  const n=c.length;
+  const ma5=smaArr(c,5), ma20=smaArr(c,20), ma60=smaArr(c,60);
+  const e12=emaArr(c,12), e26=emaArr(c,26);
+  const macd=c.map((_,k)=>e12[k]-e26[k]); const sig=emaArr(macd,9); const hist=macd.map((m,k)=>m-sig[k]);
+  const rsi=rsiArr(c,14);
+  const stK=c.map((_,k)=>k<13?null:(c[k]-ll(l,14,k))/((hh(h,14,k)-ll(l,14,k))||1e-9)*100);
+  const stD=stK.map((_,k)=>{if(k<15)return null;let s0=0;for(let q=k-2;q<=k;q++)s0+=stK[q];return s0/3;});
+  const bbU=[],bbL=[];for(let k=0;k<n;k++){if(k<19){bbU.push(null);bbL.push(null);continue;}const m=sma(c,20,k);let s2=0;for(let q=k-19;q<=k;q++)s2+=(c[q]-m)**2;const sd=Math.sqrt(s2/20);bbU.push(m+2*sd);bbL.push(m-2*sd);}
+  const envU=ma20.map(m=>m==null?null:m*1.06), envL=ma20.map(m=>m==null?null:m*0.94);
+  /* 일목: 현재 위치 기준 구름(스팬 26일 선행 반영) */
+  const conv=(k)=>k<8?null:(hh(h,9,k)+ll(l,9,k))/2;
+  const baseL=(k)=>k<25?null:(hh(h,26,k)+ll(l,26,k))/2;
+  const spA=[],spB=[];for(let k=0;k<n;k++){const k2=k-26;spA.push(k2>=25?(conv(k2)+baseL(k2))/2:null);spB.push(k2>=51?(hh(h,52,k2)+ll(l,52,k2))/2:null);}
+  const convA=c.map((_,k)=>conv(k)), baseA=c.map((_,k)=>baseL(k));
+  /* SAR 궤적 */
+  const sarA=[null,null];let psUp=c[1]>c[0],af=0.02,ep=psUp?h[1]:l[1],sar=psUp?l[0]:h[0];
+  for(let k=2;k<n;k++){sar=sar+af*(ep-sar);
+    if(psUp){if(l[k]<sar){psUp=false;sar=ep;ep=l[k];af=0.02;}else if(h[k]>ep){ep=h[k];af=Math.min(af+0.02,0.2);}}
+    else{if(h[k]>sar){psUp=true;sar=ep;ep=h[k];af=0.02;}else if(l[k]<ep){ep=l[k];af=Math.min(af+0.02,0.2);}}
+    sarA.push({v:sar,up:psUp});}
+  /* CCI / MFI / %R / ROC / VR / ATR% / OBV / ADX */
+  const tp=c.map((_,k)=>(h[k]+l[k]+c[k])/3);
+  const cci=tp.map((_,k)=>{if(k<19)return null;const m=sma(tp,20,k);let md=0;for(let q=k-19;q<=k;q++)md+=Math.abs(tp[q]-m);md/=20;return (tp[k]-m)/(0.015*(md||1e-9));});
+  const mfi=tp.map((_,k)=>{if(k<14)return null;let pm=0,nm=0;for(let q=k-13;q<=k;q++){const mf=tp[q]*v[q];if(tp[q]>tp[q-1])pm+=mf;else if(tp[q]<tp[q-1])nm+=mf;}return 100-100/(1+pm/Math.max(nm,1e-9));});
+  const wr=c.map((_,k)=>k<13?null:(hh(h,14,k)-c[k])/((hh(h,14,k)-ll(l,14,k))||1e-9)*-100);
+  const roc=c.map((_,k)=>k<12?null:(c[k]/c[k-12]-1)*100);
+  const vr=c.map((_,k)=>{if(k<20)return null;let u=0,d=0,e=0;for(let q=k-19;q<=k;q++){if(c[q]>c[q-1])u+=v[q];else if(c[q]<c[q-1])d+=v[q];else e+=v[q];}return (u+e/2)/Math.max(d+e/2,1e-9)*100;});
+  const tr=[h[0]-l[0]];for(let k=1;k<n;k++)tr.push(Math.max(h[k]-l[k],Math.abs(h[k]-c[k-1]),Math.abs(l[k]-c[k-1])));
+  const atrP=[];{let a=null;for(let k=0;k<n;k++){if(k<14){atrP.push(null);continue;}if(k===14){let s0=0;for(let q=1;q<=14;q++)s0+=tr[q];a=s0/14;}else a=(a*13+tr[k])/14;atrP.push(a/c[k]*100);}}
+  let obv=0;const obvA=[0];for(let k=1;k<n;k++){obv+=c[k]>c[k-1]?v[k]:c[k]<c[k-1]?-v[k]:0;obvA.push(obv);}
+  const pdiA=Array(n).fill(null),ndiA=Array(n).fill(null),adxA=Array(n).fill(null);
+  {let pdm=0,ndm=0,trs=0,sp=0,sn=0,st=0;const dx=[];
+   for(let k=1;k<n;k++){const up=h[k]-h[k-1],dn=l[k-1]-l[k];const pd=(up>dn&&up>0)?up:0,nd=(dn>up&&dn>0)?dn:0;
+     if(k<=14){sp+=pd;sn+=nd;st+=tr[k];if(k===14){pdm=sp;ndm=sn;trs=st;}}
+     else{pdm=pdm-pdm/14+pd;ndm=ndm-ndm/14+nd;trs=trs-trs/14+tr[k];}
+     if(k>=14){const pi=100*pdm/(trs||1e-9),ni=100*ndm/(trs||1e-9);pdiA[k]=pi;ndiA[k]=ni;dx.push(100*Math.abs(pi-ni)/((pi+ni)||1e-9));
+       if(dx.length===14){let s0=0;for(const x of dx)s0+=x;adxA[k]=s0/14;}
+       else if(dx.length>14)adxA[k]=(adxA[k-1]*13+dx[dx.length-1])/14;}}}
+  return {ma5,ma20,ma60,macd,sig,hist,rsi,stK,stD,bbU,bbL,envU,envL,spA,spB,convA,baseA,sarA,cci,mfi,wr,roc,vr,atrP,obvA,pdiA,ndiA,adxA};
+}
+
+function ChartBlock({stock,dataState}){
+  const [rawSeries,setRawSeries]=useState(null);
+  const [err,setErr]=useState(false);
+  
+  const [years,setYears]=useState(1);
+  const [interval, setInterval] = useState("D"); // 🛠️ [수정됨] 분/일/주/월봉 토글 (D, W, M)
+
+  const [opts,setOpts]=useState(()=>{try{const j=JSON.parse(localStorage.getItem(CHART_OPT_KEY));return j&&j.ov&&j.sub?j:defChartOpts();}catch(e){return defChartOpts();}});
+  useEffect(()=>localStorage.setItem(CHART_OPT_KEY,JSON.stringify(opts)),[opts]);
+  
+  const maPeriods=(opts.maPeriods&&opts.maPeriods.length)?opts.maPeriods:[5,20,60];
+  const [maInput,setMaInput]=useState("");
+  const addMaPeriod=()=>{
+    const v=parseInt(maInput,10);
+    if(!v||v<2||v>240||maPeriods.includes(v)||maPeriods.length>=MA_MAX){setMaInput("");return;}
+    setOpts(p=>({...p,maPeriods:[...maPeriods,v].sort((a,b)=>a-b)}));
+    setMaInput("");
+  };
+  const removeMaPeriod=(p)=>{
+    if(maPeriods.length<=1)return;
+    setOpts(pr=>({...pr,maPeriods:maPeriods.filter(x=>x!==p)}));
+  };
+  
+  const svgRef=useRef(null);
+  const [cross,setCross]=useState(null);            
+  const [pinned,setPinned]=useState(null);           
+  const [drawMode,setDrawMode]=useState("none");    
+  const [pending,setPending]=useState(null);        
+  const [draws,setDraws]=useState(()=>{try{const j=JSON.parse(localStorage.getItem(DRAW_KEY)||"{}");return j[stock.code]||[];}catch(e){return [];}});
+  useEffect(()=>{setCross(null);setPinned(null);setPending(null);setDrawMode("none");
+    try{const j=JSON.parse(localStorage.getItem(DRAW_KEY)||"{}");setDraws(j[stock.code]||[]);}catch(e){setDraws([]);}},[stock.code]);
+  useEffect(()=>{try{const j=JSON.parse(localStorage.getItem(DRAW_KEY)||"{}");j[stock.code]=draws;localStorage.setItem(DRAW_KEY,JSON.stringify(j));}catch(e){}},[draws,stock.code]);
+  
+  const changeYears=(y)=>{setYears(y);setCross(null);setPinned(null);setPending(null);};
+  
+  useEffect(()=>{
+    setRawSeries(null);setErr(false);
+    if(dataState!=="live"){
+      if(stock.open)setRawSeries({o:stock.open,h:stock.high,l:stock.low,c:stock.close,v:stock.vol});
+      else setErr(true);
+      return;
+    }
+    const base=localStorage.getItem(DATA_URL_KEY)||"";
+    const url=base.replace(/screener\.json.*$/,"charts/"+stock.code+".json");
+    fetch(url,{cache:"no-store"}).then(r=>{if(!r.ok)throw 0;return r.json();})
+      .then(j=>{if(!j||!Array.isArray(j.c))throw 0;setRawSeries({o:j.o,h:j.h,l:j.l,c:j.c,v:j.v});})
+      .catch(()=>setErr(true));
+  },[stock.code,dataState]);
+
+  /* 🛠️ [수정됨] 주기에 맞춰 데이터 리샘플링 실행 */
+  const series = useMemo(() => {
+    if (!rawSeries) return null;
+    return resampleSeries(rawSeries, interval);
+  }, [rawSeries, interval]);
+
+  if(err) return <div className="card p-4 mt-4 text-[13px]" style={{color:"var(--tx2)"}}>이 종목의 차트 데이터를 불러오지 못했어요. 수집을 한 번 실행하면 표시돼요.</div>;
+  if(!series) return <div className="card p-4 mt-4 text-[13px]" style={{color:"var(--tx3)"}}>⏳ 차트 불러오는 중…</div>;
+
+  /* 🛠️ [수정됨] 주기에 따라 화면에 보여줄 봉 개수 계산 */
+  const baseDays = years === 3 ? 760 : years === 2 ? 500 : 250;
+  const wantBars = interval === "D" ? baseDays : interval === "W" ? Math.ceil(baseDays / 5) : Math.ceil(baseDays / 20);
+  const L = Math.min(wantBars, series.c.length);
+  
+  const sl=(a)=>a.slice(a.length-L);
+  const o=sl(series.o),h=sl(series.h),l=sl(series.l),c=sl(series.c),v=sl(series.v);
+  const S=calcSeries(series.o,series.h,series.l,series.c,series.v);
+  const cut=(a)=>a.slice(a.length-L);
+  Object.keys(S).forEach(k=>S[k]=cut(S[k]));
+  
+  const maColorFor=(p)=>{const base={5:MA_COLORS[0],20:MA_COLORS[1],60:MA_COLORS[2]};return base[p]||MA_COLORS[(p*7)%MA_COLORS.length];};
+  const maLines=maPeriods.map((p)=>({period:p,color:maColorFor(p),arr:cut(smaArr(series.c,p))}));
+  
+  const boxWin = interval === "D" ? 60 : interval === "W" ? 12 : 3;
+  const bStart=Math.max(0,series.c.length-boxWin);
+  const boxHi=Math.max(...series.h.slice(bStart));
+  const boxLo=Math.min(...series.l.slice(bStart));
+
+  const W=680,PADL=8,PADR=48,plotW=W-PADL-PADR;
+  const X=(i)=>PADL+(i+0.5)/L*plotW;
+  const cw=Math.max(1.6,plotW/L*0.62);
+  const line=(arr,y)=>arr.map((val,i)=>val==null?null:`${X(i).toFixed(1)},${y(val).toFixed(1)}`).filter(Boolean).join(" ");
+  const last=(arr)=>{for(let i=arr.length-1;i>=0;i--)if(arr[i]!=null)return arr[i];return null;};
+  
+  /* 🛠️ [수정됨] 박스 버튼들을 라디오 버튼처럼 동작하도록 토글 함수 분기 */
+  const toggleOv = (k) => setOpts(p => {
+    const nextOv = {...p.ov, [k]: !p.ov[k]};
+    if(k==="box1" && nextOv.box1) { nextOv.box2 = false; nextOv.box3 = false; }
+    if(k==="box2" && nextOv.box2) { nextOv.box1 = false; nextOv.box3 = false; }
+    if(k==="box3" && nextOv.box3) { nextOv.box1 = false; nextOv.box2 = false; }
+    return {...p, ov: nextOv};
+  });
+  const toggleSub = (k) => setOpts(p => ({...p, sub:{...p.sub,[k]:!p.sub[k]}}));
+
+  let mn=Math.min(...l),mx=Math.max(...h);
+  const wide=(arr)=>arr.forEach(x=>{const val=x&&x.v!==undefined?x.v:x;if(val!=null&&isFinite(val)){mn=Math.min(mn,val);mx=Math.max(mx,val);}});
+  if(opts.ov.bb){wide(S.bbU);wide(S.bbL);} if(opts.ov.env){wide(S.envU);wide(S.envL);}
+  if(opts.ov.ichi){wide(S.spA);wide(S.spB);} if(opts.ov.sar)wide(S.sarA);
+  const pad=(mx-mn)*0.04;mn-=pad;mx+=pad;
+  const MH=230;const Y=(val)=>MH-4-(val-mn)/((mx-mn)||1)*(MH-8);
+
+  const invY=(y)=>mn+(MH-4-y)*((mx-mn)||1)/(MH-8);
+  const evXY=(e)=>{const t=e.touches?e.touches[0]:e;const r=svgRef.current.getBoundingClientRect();
+    return {x:(t.clientX-r.left)*W/r.width, y:(t.clientY-r.top)*MH/r.height};};
+  const toIdx=(x)=>Math.max(0,Math.min(L-1,Math.round((x-PADL)/plotW*L-0.5)));
+  const ciX=(i)=>X(Math.max(0,Math.min(L-1,i)));
+  const onMove=(e)=>{if(pinned)return; const p=evXY(e);setCross({i:toIdx(p.x), y:Math.max(2,Math.min(MH-2,p.y))});};
+  const onLeave=()=>{if(!pinned)setCross(null);};
+  const onTap=(e)=>{
+    if(drawMode==="none"){
+      if(pinned){ setPinned(null); const p=evXY(e); setCross({i:toIdx(p.x), y:Math.max(2,Math.min(MH-2,p.y))}); }
+      else{ const p=evXY(e); setPinned({i:toIdx(p.x), y:Math.max(2,Math.min(MH-2,p.y))}); }
+      return;
+    }
+    const p=evXY(e); const i=toIdx(p.x), pr=invY(p.y);
+    if(drawMode==="h"){ setDraws(d=>[...d,{type:"h",p:pr}]); }
+    else if(!pending){ setPending({i,p:pr}); }
+    else { setDraws(d=>[...d,{type:"t",i1:pending.i,p1:pending.p,i2:i,p2:pr}]); setPending(null); }
+  };
+
+  let cloud=null;
+  if(opts.ov.ichi){
+    const segs=[];let seg=[];
+    for(let i=0;i<L;i++){if(S.spA[i]!=null&&S.spB[i]!=null)seg.push(i);else{if(seg.length>1)segs.push(seg);seg=[];}}
+    if(seg.length>1)segs.push(seg);
+    cloud=segs.map((sg,si)=>{
+      const top=sg.map(i=>`${X(i).toFixed(1)},${Y(Math.max(S.spA[i],S.spB[i])).toFixed(1)}`).join(" L");
+      const bot=[...sg].reverse().map(i=>`${X(i).toFixed(1)},${Y(Math.min(S.spA[i],S.spB[i])).toFixed(1)}`).join(" L");
+      return <path key={si} d={`M${top} L${bot} Z`} fill="rgba(212,169,78,.10)" stroke="none"/>;
+    });
+  }
+
+  const Panel=({title,children,guide,lastLabel,H=64})=>(
+    <div style={{borderTop:"1px solid var(--line)"}} className="pt-1">
+      <div className="flex justify-between items-center px-1">
+        <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>{title}</span>
+        {lastLabel!=null&&<span className="text-[10px] num" style={{color:"var(--gold)"}}>{lastLabel}</span>}
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} style={{width:"100%",display:"block"}}>{guide}{children}</svg>
+    </div>);
+
+  const osc=(arr,lo0,hi0,color,guides)=>{
+    const yy=(val)=>60-2-(Math.min(Math.max(val,lo0),hi0)-lo0)/((hi0-lo0)||1)*56;
+    return {poly:<polyline points={line(arr,yy)} fill="none" stroke={color} strokeWidth="1.4"/>,
+      guide:guides.map((g,i)=><line key={i} x1={PADL} x2={W-PADR} y1={yy(g)} y2={yy(g)} stroke="#2A3648" strokeDasharray="3 3" strokeWidth="0.7"/>)};
+  };
+  const autoRange=(arr)=>{const vs=arr.filter(x=>x!=null&&isFinite(x));if(!vs.length)return[0,1];let a=Math.min(...vs),b=Math.max(...vs);if(a===b){a-=1;b+=1;}const p2=(b-a)*0.06;return[a-p2,b+p2];};
+  const oscAuto=(arr,color,guides=[])=>{const[a,b]=autoRange(arr.concat(guides));return osc(arr,a,b,color,guides);};
+
+  const vmax=Math.max(...v);
+
+  return <div className="mt-4">
+    {/* 🛠️ [수정됨] 기간 및 주기 선택 UI 확장 */}
+    <div className="flex flex-wrap gap-4 items-center mb-2">
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>기간</span>
+        {[1,2,3].map(y=><span key={y} className={"chip "+(years===y?"on":"")} style={{padding:"3px 11px",fontSize:11}} onClick={()=>changeYears(y)}>{y}년</span>)}
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>주기</span>
+        {Object.entries({D:"일",W:"주",M:"월"}).map(([k,v])=><span key={k} className={"chip "+(interval===k?"on":"")} style={{padding:"3px 11px",fontSize:11}} onClick={()=>{setInterval(k);setCross(null);setPinned(null);}}>{v}봉</span>)}
+        <span className="text-[10px] ml-1" style={{color:"var(--tx3)"}}>*분봉 미지원</span>
+      </div>
+      <span className="text-[10px] ml-auto" style={{color: L<wantBars ? "var(--gold)" : "var(--tx3)"}}>{L<wantBars ? `⚠️ 서버 보유 데이터가 ${series.c.length}봉이라 여기까지만 표시돼요 (최신 수집기로 갱신하면 최대 3년)` : `차트 ${L}봉 표시됨`}</span>
+    </div>
+    
+    <div className="flex flex-wrap gap-1.5 items-center">
+      <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>오버레이</span>
+      {OVERLAYS.map(([k,lab])=><span key={k} className={"chip "+(opts.ov[k]?"on":"")} style={{padding:"3px 9px",fontSize:11}} onClick={()=>toggleOv(k)}>{lab}</span>)}
+    </div>
+    <div className="flex flex-wrap gap-1.5 items-center mt-1.5">
+      <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>보조차트</span>
+      {SUBS.map(([k,lab])=><span key={k} className={"chip "+(opts.sub[k]?"on":"")} style={{padding:"3px 9px",fontSize:11}} onClick={()=>toggleSub(k)}>{lab}</span>)}
+    </div>
+    <div className="flex flex-wrap gap-1.5 items-center mt-1.5 mb-2">
+      <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>그리기</span>
+      <span className={"chip "+(drawMode==="h"?"on":"")} style={{padding:"3px 9px",fontSize:11}} onClick={()=>{setDrawMode(m=>m==="h"?"none":"h");setPending(null);}}>─ 수평선(가격)</span>
+      <span className={"chip "+(drawMode==="t"?"on":"")} style={{padding:"3px 9px",fontSize:11}} onClick={()=>{setDrawMode(m=>m==="t"?"none":"t");setPending(null);}}>╱ 추세선</span>
+      {draws.length>0&&<span className="chip" style={{padding:"3px 9px",fontSize:11}} onClick={()=>{setDraws(d=>d.slice(0,-1));setPending(null);}}>↩ 하나 지우기</span>}
+      {draws.length>0&&<span className="chip" style={{padding:"3px 9px",fontSize:11}} onClick={()=>{setDraws([]);setPending(null);}}>✕ 전체 삭제</span>}
+      {drawMode!=="none"&&<span className="text-[10px]" style={{color:"var(--gold)"}}>
+        {drawMode==="h"?"차트를 누르면 그 가격에 수평선이 생겨요":(pending?"끝점을 한 번 더 눌러 주세요":"시작점을 누르고, 끝점을 한 번 더 눌러요")}
+      </span>}
+      {drawMode==="none"&&<span className="text-[10px]" style={{color:"var(--tx3)"}}>차트를 누르면 십자선이 고정돼요 · 다시 누르면 해제돼요</span>}
+    </div>
+
+    {opts.ov.ma&&<div className="flex flex-wrap gap-1.5 items-center mb-2">
+      <span className="text-[10px] font-bold" style={{color:"var(--tx3)"}}>이평선 기간</span>
+      {maLines.map(m=><span key={m.period} className="chip on" style={{padding:"3px 9px",fontSize:11}}>
+        <span style={{color:m.color}}>{m.period}일</span>
+        {maPeriods.length>1&&<b onClick={()=>removeMaPeriod(m.period)} style={{marginLeft:5,cursor:"pointer",color:"var(--tx3)"}} title="이 이평선 삭제">✕</b>}
+      </span>)}
+      {maPeriods.length<MA_MAX&&<>
+        <input type="number" placeholder="기간(일)" value={maInput} onChange={e=>setMaInput(e.target.value)}
+          onKeyDown={e=>{if(e.key==="Enter")addMaPeriod();}} style={{width:70}}/>
+        <span className="chip" style={{padding:"3px 9px",fontSize:11}} onClick={addMaPeriod}>＋ 추가</span>
+      </>}
+      {maPeriods.length>=MA_MAX&&<span className="text-[10px]" style={{color:"var(--tx3)"}}>최대 {MA_MAX}개까지 추가할 수 있어요</span>}
+    </div>}
+
+    {/* 메인 캔들 */}
+    <div className="card overflow-hidden" style={{background:"var(--surface2)"}}>
+      <svg ref={svgRef} viewBox={`0 0 ${W} ${MH}`}
+        style={{width:"100%",display:"block",cursor:drawMode==="none"?"crosshair":"copy",touchAction:"pan-y"}}
+        onMouseMove={onMove} onMouseLeave={onLeave} onClick={onTap} onTouchStart={onMove} onTouchMove={onMove}>
+        {[0.25,0.5,0.75].map((r,i)=><line key={i} x1={PADL} x2={W-PADR} y1={MH*r} y2={MH*r} stroke="#1B2432" strokeWidth="0.7"/>)}
+        {cloud}
+        {opts.ov.ichi&&<polyline points={line(S.spA,Y)} fill="none" stroke="#8A6F35" strokeWidth="0.8" opacity="0.7"/>}
+        {opts.ov.ichi&&<polyline points={line(S.spB,Y)} fill="none" stroke="#6B5A2E" strokeWidth="0.8" opacity="0.7"/>}
+        {opts.ov.bb&&<polyline points={line(S.bbU,Y)} fill="none" stroke="#7F8EA3" strokeWidth="0.9" strokeDasharray="4 3"/>}
+        {opts.ov.bb&&<polyline points={line(S.bbL,Y)} fill="none" stroke="#7F8EA3" strokeWidth="0.9" strokeDasharray="4 3"/>}
+        {opts.ov.env&&<polyline points={line(S.envU,Y)} fill="none" stroke="#4CC38A" strokeWidth="0.9" strokeDasharray="2 3" opacity="0.8"/>}
+        {opts.ov.env&&<polyline points={line(S.envL,Y)} fill="none" stroke="#4CC38A" strokeWidth="0.9" strokeDasharray="2 3" opacity="0.8"/>}
+        
+        {/* 🛠️ [수정됨] 박스권 1, 2, 3 단계 분리 렌더링 */}
+        {(opts.ov.box1 || opts.ov.box2 || opts.ov.box3) && boxHi!=null && <g>
+          <rect x={PADL} y={Y(boxHi)} width={plotW} height={Math.max(0,Y(boxLo)-Y(boxHi))} fill="#5BC8D9" opacity="0.06"/>
+          <line x1={PADL} x2={W-PADR} y1={Y(boxHi)} y2={Y(boxHi)} stroke="#5BC8D9" strokeWidth="1" strokeDasharray="6 3"/>
+          <line x1={PADL} x2={W-PADR} y1={Y(boxLo)} y2={Y(boxLo)} stroke="#5BC8D9" strokeWidth="1" strokeDasharray="6 3"/>
+          <text x={W-PADR+4} y={Y(boxHi)+3} fontSize="9" fill="#5BC8D9" className="num">{Math.round(boxHi).toLocaleString()}</text>
+          <text x={W-PADR+4} y={Y(boxLo)+3} fontSize="9" fill="#5BC8D9" className="num">{Math.round(boxLo).toLocaleString()}</text>
+          
+          {opts.ov.box2 && (()=>{
+             const mid = (boxHi + boxLo) / 2;
+             return <line x1={PADL} x2={W-PADR} y1={Y(mid)} y2={Y(mid)} stroke="#aaaaaa" strokeWidth="0.8" strokeDasharray="2 4"/>;
+          })()}
+
+          {opts.ov.box3 && (()=>{
+             const gap = boxHi - boxLo;
+             const mid1 = boxHi - gap/3;
+             const mid2 = boxLo + gap/3;
+             return <>
+                <line x1={PADL} x2={W-PADR} y1={Y(mid1)} y2={Y(mid1)} stroke="#aaaaaa" strokeWidth="0.8" strokeDasharray="2 4"/>
+                <line x1={PADL} x2={W-PADR} y1={Y(mid2)} y2={Y(mid2)} stroke="#aaaaaa" strokeWidth="0.8" strokeDasharray="2 4"/>
+             </>;
+          })()}
+        </g>}
+
+        {c.map((cv,i)=>{const up=cv>=o[i];const col=up?"var(--up)":"var(--down)";
+          const yO=Y(o[i]),yC=Y(cv);
+          return <g key={i}>
+            <line x1={X(i)} x2={X(i)} y1={Y(h[i])} y2={Y(l[i])} stroke={col} strokeWidth="1"/>
+            <rect x={X(i)-cw/2} y={Math.min(yO,yC)} width={cw} height={Math.max(1,Math.abs(yO-yC))} fill={col}/>
+          </g>;})}
+        {opts.ov.ma&&maLines.map(m=><polyline key={m.period} points={line(m.arr,Y)} fill="none" stroke={m.color} strokeWidth="1.2"/>)}
+        {opts.ov.sar&&S.sarA.map((x,i)=>x==null?null:<circle key={i} cx={X(i)} cy={Y(x.v)} r="1.3" fill={x.up?"#4CC38A":"#FF8A65"}/>)}
+        <text x={W-PADR+4} y={Y(c[L-1])+3} fontSize="10" fill="var(--gold)" className="num">{Math.round(c[L-1]).toLocaleString()}</text>
+        
+        {draws.map((d,di)=>{
+          if(d.type==="h") return <g key={di}>
+            <line x1={PADL} x2={W-PADR} y1={Y(d.p)} y2={Y(d.p)} stroke="#EFC96C" strokeWidth="1" strokeDasharray="7 4"/>
+            <text x={W-PADR+4} y={Y(d.p)+3} fontSize="9" fill="#EFC96C" className="num">{Math.round(d.p).toLocaleString()}</text>
+          </g>;
+          const x1=ciX(d.i1), y1=Y(d.p1), x2=ciX(d.i2), y2=Y(d.p2);
+          const xe=W-PADR, ye=(x2===x1)?y2:y1+(y2-y1)*(xe-x1)/(x2-x1);
+          return <g key={di}>
+            <line x1={x1} y1={y1} x2={xe} y2={ye} stroke="#4CC38A" strokeWidth="1.2"/>
+            <circle cx={x1} cy={y1} r="2" fill="#4CC38A"/><circle cx={x2} cy={y2} r="2" fill="#4CC38A"/>
+          </g>;
+        })}
+        {pending&&<circle cx={ciX(pending.i)} cy={Y(pending.p)} r="3" fill="none" stroke="#4CC38A" strokeWidth="1.5"/>}
+        {(pinned||cross)&&(()=>{
+          const active=pinned||cross;
+          const ti=active.i, prevC=ti>0?c[ti-1]:o[0];
+          const dchg=(c[ti]-prevC)/prevC*100;
+          const boxW=132, boxH=94;
+          const bx=X(ti)>(PADL+plotW/2)?X(ti)-boxW-10:X(ti)+10;
+          const lineCol=pinned?"#D4A94E":"#8FA0B5";
+          const rows=[
+            [(L-1-ti===0?"당일":(L-1-ti)+"봉 전"),""],
+            ["시가",Math.round(o[ti]).toLocaleString()],
+            ["고가",Math.round(h[ti]).toLocaleString()],
+            ["저가",Math.round(l[ti]).toLocaleString()],
+            ["종가",Math.round(c[ti]).toLocaleString()+" ("+(dchg>=0?"+":"")+dchg.toFixed(1)+"%)"],
+            ["거래량",v[ti].toLocaleString()+"주"],
+            ["거래대금",eok(c[ti]*v[ti])],
+          ];
+          return <g pointerEvents="none">
+            <line x1={X(ti)} x2={X(ti)} y1={0} y2={MH} stroke={lineCol} strokeDasharray="3 3" strokeWidth="0.7"/>
+            <line x1={PADL} x2={W-PADR} y1={active.y} y2={active.y} stroke={lineCol} strokeDasharray="3 3" strokeWidth="0.7"/>
+            <rect x={W-PADR} y={active.y-7} width={PADR-2} height={14} rx="3" fill="#26303F"/>
+            <text x={W-PADR+3} y={active.y+3.5} fontSize="9" fill="#E7ECF3" className="num">{Math.round(invY(active.y)).toLocaleString()}</text>
+            <rect x={bx} y={6} width={boxW} height={boxH} rx="6" fill="rgba(15,20,29,.93)" stroke={pinned?"#D4A94E":"#3A4964"}/>
+            {pinned&&<text x={bx+boxW-8} y={17} fontSize="9" fill="#D4A94E" textAnchor="end">📌 고정됨</text>}
+            {rows.map((r,ri)=><text key={ri} x={bx+8} y={19+ri*12} fontSize="9"
+              fill={ri===0?"#D4A94E":"#93A0B1"} className="num">{r[0]}{r[1]?"  ":""}
+              <tspan fill={ri===4?(dchg>=0?"#FF8A89":"#8FB6FA"):"#E7ECF3"}>{r[1]}</tspan></text>)}
+          </g>;
+        })()}
+      </svg>
+      
+      {/* 🛠️ [수정됨] 활성화된 오버레이 라벨 동적 변경 */}
+      <div className="flex flex-wrap gap-3 px-2 pb-1 text-[10px]" style={{color:"var(--tx3)"}}>
+        {opts.ov.ma&&maLines.map(m=><span key={m.period} style={{color:m.color}}>― {m.period}선</span>)}
+        {opts.ov.box1&&<span style={{color:"#5BC8D9"}}>┈ 박스 상/하단</span>}
+        {opts.ov.box2&&<span style={{color:"#5BC8D9"}}>┈ 박스 2등분</span>}
+        {opts.ov.box3&&<span style={{color:"#5BC8D9"}}>┈ 박스 3등분</span>}
+        <span className="ml-auto">화면 내 최근 {L}봉</span>
+      </div>
+
+      {opts.sub.vol&&<Panel title="거래량 (점선: 20선 평균)" lastLabel={eok(v[L-1]*c[L-1])}>
+        {v.map((vv,i)=><rect key={i} x={X(i)-cw/2} y={60-vv/vmax*54} width={cw} height={vv/vmax*54} fill={c[i]>=(i?c[i-1]:o[0])?"rgba(240,80,79,.55)":"rgba(74,140,247,.55)"}/>)}
+        <polyline points={v.map((_,i)=>{if(i<19)return null;let s0=0;for(let q=i-19;q<=i;q++)s0+=v[q];const m=s0/20;
+          return `${X(i).toFixed(1)},${(60-m/vmax*54).toFixed(1)}`;}).filter(Boolean).join(" ")}
+          fill="none" stroke="#E8B04B" strokeWidth="1" strokeDasharray="3 3" opacity="0.85"/>
+        {(pinned||cross)&&<line x1={X((pinned||cross).i)} x2={X((pinned||cross).i)} y1={0} y2={60} stroke={pinned?"#D4A94E":"#8FA0B5"} strokeDasharray="3 3" strokeWidth="0.7"/>}
+      </Panel>}
+      {opts.sub.macd&&(()=>{const all=S.macd.concat(S.sig);const[a,b]=autoRange(all);const yy=(val)=>60-2-(val-a)/((b-a)||1)*56;
+        return <Panel title="MACD (추세방향, 12·26·9)" lastLabel={last(S.macd)?.toFixed(0)}>
+          <line x1={PADL} x2={W-PADR} y1={yy(0)} y2={yy(0)} stroke="#2A3648" strokeWidth="0.7"/>
+          {S.hist.map((hv,i)=>hv==null?null:<rect key={i} x={X(i)-cw/2} y={hv>=0?yy(hv):yy(0)} width={cw} height={Math.max(0.5,Math.abs(yy(hv)-yy(0)))} fill={hv>=0?"rgba(240,80,79,.45)":"rgba(74,140,247,.45)"}/>)}
+          <polyline points={line(S.macd,yy)} fill="none" stroke="#E8B04B" strokeWidth="1.3"/>
+          <polyline points={line(S.sig,yy)} fill="none" stroke="#6FA8FF" strokeWidth="1.1"/>
+        </Panel>;})()}
+      {opts.sub.rsi&&(()=>{const r0=osc(S.rsi,0,100,"#E8B04B",[30,70]);return <Panel title="RSI (매수/매도 과열, 14)" guide={r0.guide} lastLabel={last(S.rsi)?.toFixed(1)}>{r0.poly}</Panel>;})()}
+      {opts.sub.stoch&&(()=>{const k0=osc(S.stK,0,100,"#E8B04B",[20,80]);const d0=osc(S.stD,0,100,"#6FA8FF",[]);
+        return <Panel title="스토캐스틱 (단기파동, 14·3)" guide={k0.guide} lastLabel={last(S.stK)?.toFixed(1)}>{k0.poly}{d0.poly}</Panel>;})()}
+      {opts.sub.cci&&(()=>{const r0=oscAuto(S.cci,"#E8B04B",[-100,100]);return <Panel title="CCI (추세이탈도, 20)" guide={r0.guide} lastLabel={last(S.cci)?.toFixed(0)}>{r0.poly}</Panel>;})()}
+      {opts.sub.mfi&&(()=>{const r0=osc(S.mfi,0,100,"#4CC38A",[20,80]);return <Panel title="MFI (자금흐름, 14)" guide={r0.guide} lastLabel={last(S.mfi)?.toFixed(1)}>{r0.poly}</Panel>;})()}
+      {opts.sub.adx&&(()=>{const all=S.adxA.concat(S.pdiA,S.ndiA,[25]);const[a,b]=autoRange(all);const yy=(val)=>60-2-(val-a)/((b-a)||1)*56;
+        return <Panel title="ADX / DMI (14)" lastLabel={last(S.adxA)?.toFixed(1)}>
+          <line x1={PADL} x2={W-PADR} y1={yy(25)} y2={yy(25)} stroke="#2A3648" strokeDasharray="3 3" strokeWidth="0.7"/>
+          <polyline points={line(S.pdiA,yy)} fill="none" stroke="rgba(240,80,79,.8)" strokeWidth="1"/>
+          <polyline points={line(S.ndiA,yy)} fill="none" stroke="rgba(74,140,247,.8)" strokeWidth="1"/>
+          <polyline points={line(S.adxA,yy)} fill="none" stroke="#E8B04B" strokeWidth="1.4"/>
+        </Panel>;})()}
+      {opts.sub.obv&&(()=>{const r0=oscAuto(S.obvA,"#B18CFF");return <Panel title="OBV (세력 누적매집량)" lastLabel={null}>{r0.poly}</Panel>;})()}
+      {opts.sub.atr&&(()=>{const r0=oscAuto(S.atrP,"#FF8A65");const av=last(S.atrP);return <Panel title="ATR (14, 주가 대비 %)" lastLabel={av==null?"-":av.toFixed(2)+"%"}>{r0.poly}</Panel>;})()}
+      {opts.sub.wr&&(()=>{const r0=osc(S.wr,-100,0,"#6FA8FF",[-80,-20]);return <Panel title="윌리엄스 %R (14)" guide={r0.guide} lastLabel={last(S.wr)?.toFixed(1)}>{r0.poly}</Panel>;})()}
+      {opts.sub.roc&&(()=>{const r0=oscAuto(S.roc,"#E8B04B",[0]);const rv=last(S.roc);return <Panel title="ROC (12)" guide={r0.guide} lastLabel={rv==null?"-":(rv>=0?"+":"")+rv.toFixed(1)+"%"}>{r0.poly}</Panel>;})()}
+      {opts.sub.vr&&(()=>{const r0=oscAuto(S.vr,"#4CC38A",[70,150]);return <Panel title="VR (20)" guide={r0.guide} lastLabel={last(S.vr)?.toFixed(0)}>{r0.poly}</Panel>;})()}
+    </div>
+
+    <div className="card p-4 mt-3" style={{background:"var(--surface2)"}}>
+      <div className="text-[12px] font-bold mb-2" style={{color:"var(--gold)"}}>📐 추세 정보 ({interval==="D"?"일봉":interval==="W"?"주봉":"월봉"} 기준)</div>
+      {(()=>{
+        const li=L-1;
+        const m5=S.ma5[li],m20=S.ma20[li],m60=S.ma60[li];
+        const align=(m5!=null&&m20!=null&&m60!=null)
+          ?(m5>m20&&m20>m60?"정배열 (5>20>60) — 상승 추세 정렬 상태"
+            :m5<m20&&m20<m60?"역배열 (5<20<60) — 하락 추세 정렬 상태"
+            :"혼조 — 이평선 교차 구간")
+          :"-";
+        const base10=li>=10?S.ma20[li-10]:null;
+        const slope=(m20!=null&&base10)?(m20/base10-1)*100:null;
+        const slopeTxt=slope==null?"-"
+          :slope>=1?`우상향 (최근 10봉 +${slope.toFixed(1)}%)`
+          :slope<=-1?`우하향 (최근 10봉 ${slope.toFixed(1)}%)`
+          :`횡보 (최근 10봉 ${slope>=0?"+":""}${slope.toFixed(1)}%)`;
+        const adx=S.adxA[li],pdi=S.pdiA[li],ndi=S.ndiA[li];
+        const adxTxt=adx==null?"-":`${adx.toFixed(1)} — ${adx>=25?"추세 강도 뚜렷":"추세 약함 (횡보권)"} · ${pdi>ndi?"+DI 우위 (상승 방향)":"-DI 우위 (하락 방향)"}`;
+        const hi20v=Math.max(...h.slice(-20)), lo20v=Math.min(...l.slice(-20));
+        const hiA=Math.max(...h), loA=Math.min(...l);
+        const pos=(c[li]-loA)/((hiA-loA)||1)*100;
+        const rows=[
+          ["이평선 배열", align],
+          ["20선 기울기", slopeTxt],
+          ["ADX 추세 강도", adxTxt],
+          ["최근 20봉 저항·지지 후보", `저항 후보 ${w(hi20v)} · 지지 후보 ${w(lo20v)}`],
+          [`최근 화면 내 가격 위치`, `${pos.toFixed(0)}% 지점 (0%=최저 · 100%=최고)`],
+        ];
+        return rows.map((r,ri)=><div key={ri} className="flex items-start gap-2 py-1.5 text-[13px]"
+          style={{borderBottom:ri<rows.length-1?"1px dashed #1A2230":"none"}}>
+          <span className="text-[12px]" style={{color:"var(--tx3)",width:150,flex:"none"}}>{r[0]}</span>
+          <span style={{color:"var(--tx2)"}}>{r[1]}</span>
+        </div>);
+      })()}
+      <p className="text-[11px] mt-2 leading-relaxed" style={{color:"var(--tx3)"}}>위 항목은 전일 종가 기준 계산 결과의 서술이에요. 추세가 유지되거나 전환될지는 확정할 수 없으며, 상승·하락 판단이 아닌 관찰 참고용이에요. 그리기 객체(수평선·추세선)는 이 브라우저에만 저장되고, 날짜가 갱신되면 추세선 위치가 어긋날 수 있어 다시 그리는 걸 권해요.</p>
+    </div>
+  </div>;
+}
+
+/* ================================================================
+   메인 앱
+================================================================ */
+const DATA_URL_KEY="stockcatcher_dataurl_v1";
+const fmtDate=(x)=>x&&x.length===8?`${x.slice(0,4)}.${x.slice(4,6)}.${x.slice(6)}`:x;
+
+function App(){
+  const [live,setLive]=useState(null);
+  const [dataState,setDataState]=useState("loading");
+  useEffect(()=>{
+    const url=localStorage.getItem(DATA_URL_KEY);
+    if(!url){setDataState("demo");return;}
+    fetch(url,{cache:"no-store"})
+      .then(r=>{if(!r.ok)throw 0;return r.json();})
+      .then(j=>{if(!j||!Array.isArray(j.stocks)||!j.stocks.length)throw 0;setLive(j);setDataState("live");})
+      .catch(()=>setDataState("demo"));
+  },[]);
+  const setDataUrl=()=>{
+    const cur=localStorage.getItem(DATA_URL_KEY)||"";
+    const url=prompt("screener.json 주소를 입력해 주세요.\n예: https://raw.githubusercontent.com/계정/저장소/main/data/screener.json\n\n비우고 확인을 누르면 데모 모드로 돌아가요.",cur);
+    if(url===null)return;
+    if(url.trim())localStorage.setItem(DATA_URL_KEY,url.trim());else localStorage.removeItem(DATA_URL_KEY);
+    location.reload();
+  };
+  const stocks = useMemo(()=>{
+    if(dataState==="live"&&live)
+      return live.stocks.filter(d=>d.price!=null&&d.rsi!=null&&Array.isArray(d.spark))
+        .map(d=>({code:d.code,name:d.name,market:d.market,a:d}));
+    return UNIVERSE.map(u=>{const s=genStock(u); const a=analyze(s);
+      const r=mulberry32(parseInt(u[0],10)+991);
+      a.frgBuy3=r()<0.22; a.instBuy3=r()<0.22;
+      a.frgNet3=a.frgBuy3?Math.round(3e9+r()*2.5e10):0;
+      a.instNet3=a.instBuy3?Math.round(2e9+r()*1.5e10):0;
+      a.frgNet120=a.frgBuy3?Math.round(1e10+r()*8e10):-Math.round(r()*3e10);
+      a.instNet120=a.instBuy3?Math.round(8e9+r()*5e10):-Math.round(r()*2e10);
+      a.frgBuy120=a.frgNet120>0; a.instBuy120=a.instNet120>0;
+      a.frgDays120=Math.round(r()*120); a.instDays120=Math.round(r()*120);
+      return {...s, a};});
+  },[dataState,live]);
+  const scored = useMemo(()=>stocks.map(s=>({...s, sc:scoreStock(s.a)})).sort((x,y)=>y.sc.score-x.sc.score),[stocks]);
+
+  const [tab,setTab]=useState("scan");
+  const [sel,setSel]=useState({});           
+  const [params,setParams]=useState(()=>Object.fromEntries(INDICATORS.filter(d=>d.params).map(d=>[d.id,defParams(d)])));
+  const [info,setInfo]=useState(null);        
+  const [sort,setSort]=useState("amt");
+  const [mkt,setMkt]=useState("all");
+  const [visible,setVisible]=useState(50);
+  const [q,setQ]=useState("");
+  const [iq,setIq]=useState("");
+  const [custom,setCustom]=useState([]);          
+  const [cb,setCb]=useState({metric:"rsi", op:"le", v1:"", v2:""}); 
+  const [chat,setChat]=useState("");              
+  const [chatBusy,setChatBusy]=useState(false);
+  const [chatMsg,setChatMsg]=useState(null);      
+  const [gkey,setGkey]=useState(()=>{try{return localStorage.getItem(GEMINI_KEY_LS)||"";}catch(e){return "";}});
+  const [watch,setWatch]=useState(()=>{try{return JSON.parse(localStorage.getItem("stockcatcher_watch_v1")||"[]");}catch(e){return [];}});
+  const [myPresets,setMyPresets]=useState(()=>{try{return JSON.parse(localStorage.getItem("stockcatcher_presets_v1")||"[]");}catch(e){return [];}});
+  const [detail,setDetail]=useState(null);     
+
+  useEffect(()=>localStorage.setItem("stockcatcher_watch_v1",JSON.stringify(watch)),[watch]);
+  useEffect(()=>localStorage.setItem("stockcatcher_presets_v1",JSON.stringify(myPresets)),[myPresets]);
+
+  const selIds = Object.keys(sel).filter(k=>sel[k]);
+  const results = useMemo(()=>{
+    let list = stocks;
+    if(mkt!=="all") list=list.filter(s=>s.market===mkt);
+    if(custom.length) list=list.filter(s=>custom.every(cc=>testCustom(s.a, cc)));
+    if(selIds.length){
+      list = list.filter(s=>selIds.every(id=>{
+        const d = INDICATORS.find(x=>x.id===id); if(!d) return true;
+        return d.test(s.a, params[id]||{});
+      }));
+    }
+    if(q.trim()) list=list.filter(s=>s.name.includes(q.trim())||s.code.includes(q.trim()));
+    const key = sort;
+    return [...list].sort((x,y)=> key==="chg"? y.a.chg-x.a.chg : key==="price"? y.a.price-x.a.price : y.a.amt-x.a.amt);
+  },[stocks, selIds.join(","), JSON.stringify(params), JSON.stringify(custom), sort, q, mkt]);
+  useEffect(()=>setVisible(50),[selIds.join(","), JSON.stringify(custom), q, sort, mkt, dataState]);
+
+  const toggle=(id)=>setSel(p=>({...p,[id]:!p[id]}));
+  const applyPreset=(preset)=>{
+    const ids=Array.isArray(preset)?preset:(preset.ids||[]);
+    setSel(Object.fromEntries(ids.filter(id=>INDICATORS.some(d=>d.id===id)).map(id=>[id,true])));
+    if(preset.params) setParams(prev=>{
+      const merged={...prev};
+      Object.entries(preset.params).forEach(([id,pv])=>{ if(merged[id]) merged[id]={...merged[id],...pv}; });
+      return merged;
+    });
+    setCustom(Array.isArray(preset.custom)?preset.custom:[]);
+  };
+  const savePreset=()=>{
+    if(!selIds.length&&!custom.length) return alert("먼저 지표나 나만의 조건을 1개 이상 설정해 주세요.");
+    const name=prompt("패턴 이름을 입력해 주세요.","내 패턴 "+(myPresets.length+1));
+    if(!name) return;
+    const usedParams=Object.fromEntries(selIds.filter(id=>params[id]).map(id=>[id,params[id]]));
+    setMyPresets(p=>[...p.slice(-11),{name, ids:selIds, params:usedParams, custom}]);
+  };
+  const applyParsed=(r)=>{
+    setSel(r.sel||{});
+    setParams(prev=>{const m={...prev}; Object.entries(r.params||{}).forEach(([id,pv])=>{ if(m[id]) m[id]={...m[id],...pv}; else m[id]=pv; }); return m;});
+    setCustom(Array.isArray(r.custom)?r.custom:[]);
+  };
+  
+  const getAppliedNames = (selObj, customArr) => {
+    const names = [];
+    Object.keys(selObj || {}).forEach(id => {
+      const d = INDICATORS.find(x => x.id === id);
+      if (d) names.push(d.name);
+    });
+    (customArr || []).forEach(cc => {
+      const m = METRICS.find(x => x[0] === cc.metric);
+      if (m) names.push(`수치지표(${m[1]})`);
+    });
+    return names.length ? `[${names.join(", ")}]` : "조건";
+  };
+
+  const runChat=async()=>{
+    const text=chat.trim(); if(!text) return;
+    setChatBusy(true); setChatMsg(null);
+    const ruleR=parseRules(text);
+    if(ruleR.matched>0){
+      applyParsed(ruleR);
+      const applied = getAppliedNames(ruleR.sel, ruleR.custom);
+      setChatMsg({ok:true, txt:`💡 다음 조건을 찾아 즉시 차트에 적용했어요:\n👉 ${applied}`});
+      setChatBusy(false); return;
+    }
+    if(!gkey){
+      setChatMsg({ok:false, txt:"이 문장은 규칙으로 인식하지 못했어요. AI 해석을 쓰려면 우측 🔑 버튼으로 Gemini API 키를 등록해 주세요."});
+      setChatBusy(false); return;
+    }
+    try{
+      const gR=await parseGemini(text, gkey);
+      if(gR.matched>0){ 
+        applyParsed(gR); 
+        const applied = getAppliedNames(gR.sel, gR.custom);
+        setChatMsg({ok:true, txt:`🤖 AI가 다음 조건을 찾아 즉시 차트에 적용했어요:\n👉 ${applied}`}); 
+      }
+      else setChatMsg({ok:false, txt:"조건을 특정하지 못했어요. 지표 이름이나 수치를 넣어 다시 적어보세요."});
+    }catch(e){ setChatMsg({ok:false, txt:"AI 해석에 실패했어요. 키가 유효한지, 사용량 한도를 넘지 않았는지 확인해 주세요."}); }
+    setChatBusy(false);
+  };
+  const setGeminiKey=()=>{
+    const cur=localStorage.getItem(GEMINI_KEY_LS)||"";
+    const k=prompt("Gemini API 키를 입력해 주세요. (AI Studio에서 무료 발급, 브라우저에만 저장됨)\n비우고 확인하면 삭제돼요.", cur);
+    if(k===null) return;
+    if(k.trim()){localStorage.setItem(GEMINI_KEY_LS,k.trim()); setGkey(k.trim());}
+    else{localStorage.removeItem(GEMINI_KEY_LS); setGkey("");}
+  };
+  const addCustom=()=>{
+    const v1=Number(cb.v1), v2=Number(cb.v2);
+    if(cb.v1===""||!isFinite(v1)) return alert("기준값을 입력해 주세요.");
+    if(cb.op==="bt"&&(cb.v2===""||!isFinite(v2))) return alert("범위의 두 번째 값을 입력해 주세요.");
+    setCustom(p=>[...p,{metric:cb.metric, op:cb.op, v1, v2:cb.op==="bt"?v2:null}]);
+    setCb(c=>({...c, v1:"", v2:""}));
+  };
+  const toggleWatch=(code)=>setWatch(p=>p.includes(code)?p.filter(c=>c!==code):[...p,code]);
+  const openDetail=(code)=>{const t=scored.find(x=>x.code===code); if(t)setDetail(t);};
+
+  const today = new Date(); const dstr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,"0")}.${String(today.getDate()).padStart(2,"0")}`;
+
+  return <div className="max-w-6xl mx-auto px-4 pb-24">
+
+    <header className="pt-7 pb-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-lg" style={{background:"var(--gold-soft)",border:"1px solid var(--gold-line)"}}>🎣</div>
+            <h1 className="text-xl font-extrabold tracking-tight">스톡캐쳐 <span className="text-xs font-semibold align-middle ml-1" style={{color:"var(--tx3)"}}>STOCK CATCHER · VOL17</span></h1>
+          </div>
+          <p className="text-[13px] mt-1.5" style={{color:"var(--tx2)"}}>코스피 · 코스닥 조건 탐색 및 스코어 안내 — 전일 종가 기준</p>
+        </div>
+        <div className="text-right">
+          <div className="flex items-center gap-1.5 justify-end">
+            {dataState==="live" && <button className="badge" onClick={()=>location.reload()} title="최신 데이터 다시 불러오기" style={{cursor:"pointer"}}>🔄 새로고침</button>}
+            <button className="badge" onClick={setDataUrl} title="데이터 소스 설정">
+              {dataState==="live"?"📡 실데이터 연결됨 · 소스 변경":dataState==="loading"?"⏳ 데이터 불러오는 중":"🧪 데모 시세 — 눌러서 실데이터 연결"}
+            </button>
+          </div>
+          <div className="text-[12px] mt-1.5 num" style={{color:"var(--tx3)"}}>기준일 {dataState==="live"&&live?fmtDate(live.baseDate):dstr+" (가상)"} · 대상 {stocks.length}종목</div>
+        </div>
+      </div>
+      <nav className="flex gap-6 mt-5 border-b" style={{borderColor:"var(--line)"}}>
+        {[["scan","🔍 탐색"],["reco","🏆 스코어 안내"],["watch","⭐ 관심종목"]].map(([id,label])=>
+          <button key={id} className={"tabbtn "+(tab===id?"on":"")} onClick={()=>setTab(id)}>{label}{id==="watch"&&watch.length?` (${watch.length})`:""}</button>)}
+      </nav>
+    </header>
+
+    {tab==="scan" && <div className="fadeup">
+
+      <div className="card p-4 mb-4" style={{borderColor:"var(--gold-line)"}}>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[13px] font-bold" style={{color:"var(--gold)"}}>💬 채팅으로 조건 찾기</span>
+          <span className="text-[11px]" style={{color:"var(--tx3)"}}>원하는 조건을 문장으로 적으면 필터를 자동으로 세팅해요</span>
+          <button className="chip ml-auto" style={{padding:"4px 10px",fontSize:12}} onClick={setGeminiKey} title="AI 해석용 Gemini 키">
+            {gkey?"🔑 AI 켜짐":"🔑 AI 키 등록"}
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <input type="text" value={chat} onChange={e=>setChat(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter")runChat();}}
+            placeholder="예: 박스권 하단에 위치하고 거래량이 터진 종목"
+            style={{flex:1}} disabled={chatBusy}/>
+          <button className="chip on" style={{padding:"7px 16px"}} onClick={runChat} disabled={chatBusy}>
+            {chatBusy?"분석 중…":"찾기"}
+          </button>
+        </div>
+        
+        {chatMsg && <div className="text-[12.5px] mt-2 p-3 rounded-lg leading-relaxed" 
+            style={{background:chatMsg.ok?"var(--gold-soft)":"rgba(255,155,154,.1)", color:chatMsg.ok?"var(--gold)":"#FF9B9A", whiteSpace:"pre-wrap"}}>
+            {chatMsg.ok?"":"⚠️ "}{chatMsg.txt}
+        </div>}
+        
+        <div className="flex gap-1.5 flex-wrap mt-2">
+          {["박스권 종목","박스권 하단에 RSI 30 이하","박스권 상단 돌파 임박","정배열에 거래량 3배","외국인 기관 동시 순매수"].map(ex=>
+            <button key={ex} className="chip" style={{padding:"3px 9px",fontSize:11}} onClick={()=>setChat(ex)}>{ex}</button>)}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap mb-4">
+        <span className="text-[12px] font-bold mr-1" style={{color:"var(--tx3)"}}>프리셋</span>
+        {PRESETS.map(p=><button key={p.name} className="chip" title={p.memo} onClick={()=>applyPreset(p)}>{p.name}</button>)}
+        {myPresets.map((p,i)=><button key={i} className="chip" onClick={()=>applyPreset(p)}>💾 {p.name}</button>)}
+        <button className="chip" onClick={savePreset}>＋ 현재 조합 저장</button>
+        {(selIds.length>0||custom.length>0) && <button className="chip" onClick={()=>{setSel({});setCustom([]);setChatMsg(null);setChat("");}}>초기화</button>}
+        <input type="text" placeholder="🔎 지표 검색" value={iq} onChange={e=>setIq(e.target.value)} style={{maxWidth:130, marginLeft:"auto"}}/>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        {CATS.map(cat=>
+          <div key={cat.id} className="card p-4">
+            <div className="text-[13px] font-bold mb-3" style={{color:"var(--tx2)"}}>{cat.icon} {cat.name}</div>
+            <div className="flex flex-wrap gap-2">
+              {INDICATORS.filter(d=>d.cat===cat.id&&(!iq.trim()||d.name.toLowerCase().includes(iq.trim().toLowerCase()))).map(d=>
+                <span key={d.id} className={"chip "+(sel[d.id]?"on":"")} onClick={()=>toggle(d.id)}>
+                  {d.name}
+                  <b className="opacity-70 text-[11px]" onClick={(e)=>{e.stopPropagation();setInfo(d);}} title="설명 보기">ⓘ</b>
+                </span>)}
+            </div>
+            {INDICATORS.filter(d=>d.cat===cat.id&&d.params&&sel[d.id]).map(d=>
+              <div key={d.id} className="mt-3 pt-3" style={{borderTop:"1px dashed var(--line)"}}>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[12px] font-semibold" style={{color:"var(--gold)"}}>{d.name}</span>
+                  {Object.entries(d.params).map(([k,cfg])=>
+                    <label key={k} className="flex items-center gap-1.5 text-[12px]" style={{color:"var(--tx2)"}}>
+                      {cfg.label}
+                      <input type="number" style={{width:90}} value={params[d.id][k]}
+                        onChange={e=>setParams(p=>({...p,[d.id]:{...p[d.id],[k]:Number(e.target.value)}}))}/>
+                      {cfg.unit}
+                    </label>)}
+                </div>
+                {d.cat==="box" && <>
+                  <div className="flex gap-1.5 flex-wrap mt-2">
+                    <span className="text-[11px]" style={{color:"var(--tx3)"}}>쉬운 설정 →</span>
+                    {BOX_PRESETS.map(bp=>
+                      <button key={bp.key} className="chip" style={{padding:"3px 9px",fontSize:11}} title={bp.memo}
+                        onClick={()=>setParams(p=>({...p,[d.id]:{...p[d.id],...bp.vals,...(d.params.pos!=null?{pos:p[d.id].pos}:{})}}))}>
+                        {bp.name}
+                      </button>)}
+                  </div>
+                  <div className="mt-2 p-2.5 text-[12px] leading-relaxed" style={{background:"var(--surface2)",borderRadius:8,color:"var(--tx2)"}}>
+                    <div>📏 {explainBoxWidth(params[d.id].width)}</div>
+                    <div className="mt-1.5">📐 {explainBoxFlat(params[d.id].flat)}</div>
+                    <div className="mt-1.5">📈 {explainBoxSlope(params[d.id].slope)}</div>
+                    {d.params.pos!=null && <div className="mt-1.5">📍 {explainBoxPos(params[d.id].pos, d.id==="boxBottom"?"low":"high")}</div>}
+                  </div>
+                </>}
+              </div>)}
+          </div>)}
+
+        <div className="card p-4" style={{borderColor:"var(--gold-line)"}}>
+          <div className="text-[13px] font-bold mb-1" style={{color:"var(--gold)"}}>🧪 나만의 조건 (커스텀 패턴)</div>
+          <p className="text-[12px] mb-3" style={{color:"var(--tx3)"}}>수치 지표를 직접 골라 기준을 정해요. 위 지표들과 AND로 결합되고, 패턴 저장 시 함께 저장돼요.</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            <select value={cb.metric} onChange={e=>setCb(c=>({...c,metric:e.target.value}))} style={{maxWidth:230}}>
+              {METRICS.map(([k,label])=><option key={k} value={k}>{label}</option>)}
+            </select>
+            <select value={cb.op} onChange={e=>setCb(c=>({...c,op:e.target.value}))}>
+              <option value="ge">이상</option><option value="le">이하</option><option value="bt">범위</option>
+            </select>
+            <input type="number" placeholder="기준값" value={cb.v1} onChange={e=>setCb(c=>({...c,v1:e.target.value}))} style={{width:100}}/>
+            {cb.op==="bt"&&<input type="number" placeholder="~까지" value={cb.v2} onChange={e=>setCb(c=>({...c,v2:e.target.value}))} style={{width:100}}/>}
+            <span className="text-[12px]" style={{color:"var(--tx3)"}}>{(METRICS.find(x=>x[0]===cb.metric)||[])[2]}</span>
+            <button className="chip on" onClick={addCustom}>＋ 조건 추가</button>
+          </div>
+          {custom.length>0&&<div className="flex flex-wrap gap-1.5 mt-3">
+            {custom.map((cc,i)=>{const m=METRICS.find(x=>x[0]===cc.metric)||["","?",""];
+              return <span key={i} className="chip on">
+                {m[1]} {cc.op==="bt"?`${cc.v1}~${cc.v2}`:cc.v1}{m[2]} {OP_LABEL[cc.op]}
+                <b onClick={()=>setCustom(p=>p.filter((_,j)=>j!==i))} style={{marginLeft:4,cursor:"pointer"}}>✕</b>
+              </span>;})}
+          </div>}
+        </div>
+      </div>
+
+      <div className="sticky top-0 z-10 mt-4 mb-3 card px-4 py-3 flex items-center gap-2 flex-wrap" style={{background:"rgba(19,25,35,.92)",backdropFilter:"blur(8px)"}}>
+        {(selIds.length===0&&custom.length===0)
+          ? <span className="text-[13px]" style={{color:"var(--tx3)"}}>지표를 선택하거나 나만의 조건을 만들면, 모두 충족(AND)하는 종목만 걸러져요.</span>
+          : <>
+              <span className="text-[12px] font-bold" style={{color:"var(--tx3)"}}>적용 중</span>
+              {selIds.map((id,i)=>{const d=INDICATORS.find(x=>x.id===id);return <React.Fragment key={id}>
+                {i>0&&<span className="and-word">AND</span>}
+                <span className="and-pill">{d?d.name:id}</span>
+              </React.Fragment>;})}
+              {custom.map((cc,i)=>{const m=METRICS.find(x=>x[0]===cc.metric)||["","?",""];return <React.Fragment key={"c"+i}>
+                {(selIds.length>0||i>0)&&<span className="and-word">AND</span>}
+                <span className="and-pill">🧪 {m[1]} {cc.op==="bt"?`${cc.v1}~${cc.v2}`:cc.v1}{m[2]} {OP_LABEL[cc.op]}</span>
+              </React.Fragment>;})}
+            </>}
+        <span className="ml-auto text-[13px] font-bold num" style={{color:"var(--gold)"}}>{results.length}종목</span>
+      </div>
+
+      <div className="card overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 flex-wrap" style={{borderBottom:"1px solid var(--line)"}}>
+          <input type="text" placeholder="종목명 · 코드 검색" value={q} onChange={e=>setQ(e.target.value)} style={{maxWidth:200}}/>
+          <div className="flex gap-1.5">
+            {[["all","전체"],["KOSPI","코스피"],["KOSDAQ","코스닥"]].map(([k,l])=>
+              <button key={k} className={"chip "+(mkt===k?"on":"")} style={{padding:"5px 11px",fontSize:12}} onClick={()=>setMkt(k)}>{l}</button>)}
+          </div>
+          <div className="ml-auto flex gap-1.5">
+            {[["amt","거래대금순"],["chg","등락률순"],["price","가격순"]].map(([k,l])=>
+              <button key={k} className={"chip "+(sort===k?"on":"")} style={{padding:"5px 11px",fontSize:12}} onClick={()=>setSort(k)}>{l}</button>)}
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead><tr><th>종목</th><th>차트(60일)</th><th>현재가</th><th>등락률</th><th>거래대금</th><th>충족 조건</th><th></th></tr></thead>
+            <tbody>
+              {results.slice(0,visible).map(s=>{
+                const matched = selIds.map(id=>INDICATORS.find(x=>x.id===id)).filter(Boolean);
+                return <tr key={s.code} className="row">
+                  <td>
+                    <div className="flex items-center gap-2.5">
+                      <button onClick={()=>toggleWatch(s.code)} title="관심종목" className="text-[15px]" style={{color:watch.includes(s.code)?"var(--gold)":"var(--tx3)"}}>{watch.includes(s.code)?"★":"☆"}</button>
+                      <div>
+                        <button onClick={()=>openDetail(s.code)} className="font-semibold hover:underline text-left">{s.name}</button>
+                        <div className="text-[11px] mono" style={{color:"var(--tx3)"}}>{s.code} · {s.market==="KOSPI"?"코스피":"코스닥"}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><div className="flex justify-end"><Spark data={s.a.spark}/></div></td>
+                  <td className="num font-semibold">{w(s.a.price)}</td>
+                  <td className="num font-bold" style={{color:cc(s.a.chg)}}>{pct(s.a.chg)}</td>
+                  <td className="num" style={{color:"var(--tx2)"}}>{eok(s.a.amt)}</td>
+                  <td>
+                    <div className="flex gap-1.5 justify-end flex-wrap" style={{maxWidth:260,marginLeft:"auto"}}>
+                      {matched.length? matched.map(d=><span key={d.id} className="badge">{d.name}</span>) : <span className="badge gray">전체 보기</span>}
+                    </div>
+                  </td>
+                  <td><a href={"https://finance.naver.com/item/main.naver?code="+s.code} target="_blank" rel="noreferrer" className="text-[12px]" style={{color:"var(--tx3)"}}>상세 ↗</a></td>
+                </tr>;})}
+              {results.length===0 && <tr><td colSpan="7" className="text-center py-10" style={{color:"var(--tx3)"}}>조건을 모두 충족하는 종목이 없어요. 필터를 하나 줄여 보세요.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+        {results.length>visible && <div className="text-center py-3" style={{borderTop:"1px solid var(--line)"}}>
+          <button className="chip" onClick={()=>setVisible(v=>v+50)}>더 보기 ＋50 (남은 {(results.length-visible).toLocaleString()}종목)</button>
+        </div>}
+      </div>
+    </div>}
+
+    {tab==="reco" && <div className="fadeup">
+      <div className="card px-4 py-3 mb-4 text-[13px]" style={{color:"var(--tx2)"}}>
+        전일 종가 데이터에서 계산된 지표 충족 항목에 점수를 매겨 합산한 결과예요. 점수가 높다는 것은 "정해진 조건을 많이 충족했다"는 사실이며, 상승 보장이 아니에요. 각 카드를 누르면 근거 전체와 관찰 시나리오를 볼 수 있어요.
+      </div>
+      <div className="grid md:grid-cols-2 gap-3">
+        {scored.slice(0,10).map((s,rank)=>
+          <button key={s.code} className="card p-4 text-left hover:brightness-110 transition" onClick={()=>setDetail(s)}>
+            <div className="flex items-center gap-3">
+              <div className={"grade g-"+s.sc.grade}>{s.sc.grade}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold">{rank+1}. {s.name}</span>
+                  <span className="text-[11px] mono" style={{color:"var(--tx3)"}}>{s.code} · {s.market==="KOSPI"?"코스피":"코스닥"}</span>
+                </div>
+                <div className="text-[12px] mt-0.5 num" style={{color:"var(--tx2)"}}>
+                  {w(s.a.price)} <b style={{color:cc(s.a.chg)}}>{pct(s.a.chg)}</b> · 거래대금 {eok(s.a.amt)}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-lg font-extrabold num" style={{color:"var(--gold)"}}>{s.sc.score}<span className="text-[11px]" style={{color:"var(--tx3)"}}>점</span></div>
+                <Spark data={s.a.spark} w2={72} h={22}/>
+              </div>
+            </div>
+            <div className="flex gap-1.5 flex-wrap mt-3">
+              {s.sc.hits.slice(0,4).map((h,i)=><span key={i} className="badge">＋{h.pts} {h.label}</span>)}
+              {s.sc.hits.length>4&&<span className="badge gray">외 {s.sc.hits.length-4}건</span>}
+              {s.sc.warns.map((h,i)=><span key={i} className="badge" style={{background:"rgba(240,80,79,.12)",color:"#FF9B9A",borderColor:"rgba(240,80,79,.3)"}}>{h.pts} {h.label}</span>)}
+            </div>
+          </button>)}
+      </div>
+      <p className="text-[12px] mt-5 leading-relaxed" style={{color:"var(--tx3)"}}>⚠️ 본 화면은 조건 충족 사실과 계산 결과의 안내이며, 특정 종목의 매수·매도 권유가 아니에요. 투자 판단과 그에 따른 책임은 이용자 본인에게 있어요.</p>
+    </div>}
+
+    {tab==="watch" && <div className="fadeup">
+      {watch.length===0
+        ? <div className="card p-10 text-center" style={{color:"var(--tx3)"}}>아직 관심종목이 없어요.<br/>탐색 탭에서 ☆ 별을 눌러 담아두면 여기서 조건 충족 현황을 추적할 수 있어요.</div>
+        : <div className="grid md:grid-cols-2 gap-3">
+            {scored.filter(s=>watch.includes(s.code)).map(s=>
+              <div key={s.code} className="card p-4">
+                <div className="flex items-center gap-3">
+                  <button onClick={()=>toggleWatch(s.code)} className="text-[17px]" style={{color:"var(--gold)"}}>★</button>
+                  <div className="flex-1">
+                    <button onClick={()=>openDetail(s.code)} className="font-bold hover:underline text-left">{s.name}</button>
+                    <div className="text-[12px] num" style={{color:"var(--tx2)"}}>{w(s.a.price)} <b style={{color:cc(s.a.chg)}}>{pct(s.a.chg)}</b></div>
+                  </div>
+                  <div className={"grade g-"+s.sc.grade} style={{width:38,height:38,fontSize:16}}>{s.sc.grade}</div>
+                </div>
+                <div className="flex gap-1.5 flex-wrap mt-3">
+                  {s.sc.hits.map((h,i)=><span key={i} className="badge">{h.label}</span>)}
+                  {s.sc.hits.length===0&&<span className="badge gray">현재 충족 조건 없음</span>}
+                </div>
+              </div>)}
+          </div>}
+    </div>}
+
+    {info && <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{background:"rgba(0,0,0,.6)"}} onClick={()=>setInfo(null)}>
+      <div className="card p-5 max-w-sm w-full fadeup" onClick={e=>e.stopPropagation()}>
+        <div className="font-bold mb-2" style={{color:"var(--gold)"}}>{info.name}</div>
+        <p className="text-[14px] leading-relaxed" style={{color:"var(--tx2)"}}>{info.desc}</p>
+        <button className="chip mt-4" onClick={()=>setInfo(null)}>닫기</button>
+      </div>
+    </div>}
+
+    {detail && <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4" style={{background:"rgba(0,0,0,.65)"}} onClick={()=>setDetail(null)}>
+      <div className="card p-5 max-w-2xl w-full max-h-[88vh] overflow-y-auto fadeup" style={{borderRadius:"18px 18px 0 0"}} onClick={e=>e.stopPropagation()}>
+        <div className="flex items-center gap-3">
+          <div className={"grade g-"+detail.sc.grade}>{detail.sc.grade}</div>
+          <div className="flex-1">
+            <div className="font-extrabold text-[17px]">{detail.name} <span className="text-[12px] mono font-normal" style={{color:"var(--tx3)"}}>{detail.code}</span></div>
+            <div className="text-[13px] num" style={{color:"var(--tx2)"}}>{w(detail.a.price)} <b style={{color:cc(detail.a.chg)}}>{pct(detail.a.chg)}</b> · 스코어 <b style={{color:"var(--gold)"}}>{detail.sc.score}점</b></div>
+          </div>
+          <button onClick={()=>setDetail(null)} className="text-xl" style={{color:"var(--tx3)"}}>✕</button>
+        </div>
+
+        <ChartBlock stock={detail} dataState={dataState}/>
+
+        <div className="mt-4">
+          <div className="text-[12px] font-bold mb-2" style={{color:"var(--gold)"}}>✔️ 스코어 산정 근거</div>
+          {detail.sc.hits.map((h,i)=>
+            <div key={i} className="flex items-start gap-2 py-1.5 text-[13px]" style={{borderBottom:"1px dashed #1A2230"}}>
+              <span className="num font-bold" style={{color:"var(--gold)",width:34,flex:"none"}}>＋{h.pts}</span>
+              <span style={{color:"var(--tx2)"}}>{h.why}</span>
+            </div>)}
+          {detail.sc.warns.map((h,i)=>
+            <div key={i} className="flex items-start gap-2 py-1.5 text-[13px]" style={{borderBottom:"1px dashed #1A2230"}}>
+              <span className="num font-bold" style={{color:"#FF8A89",width:34,flex:"none"}}>{h.pts}</span>
+              <span style={{color:"var(--tx2)"}}>{h.why}</span>
+            </div>)}
+        </div>
+
+        <div className="mt-5">
+          <div className="text-[12px] font-bold mb-2" style={{color:"var(--gold)"}}>🔭 이후 관찰 시나리오 (확정이 아닌 조건부)</div>
+          <div className="text-[13px] leading-relaxed space-y-2" style={{color:"var(--tx2)"}}>
+            <p>＋ 상방 관찰: 거래량이 20선 평균 수준을 유지하며 20선({w(detail.a.ma20)}) 위에서 지지될 경우, 현재 흐름이 이어질 여지를 관찰할 수 있어요.</p>
+            <p>＋ 하방 관찰: 거래량 감소와 함께 5선({w(detail.a.ma5)})을 이탈하면 단기 되돌림 가능성을 먼저 점검하는 게 좋아요.</p>
+            <p>＋ 체크 포인트: 1차 지지 후보 20선 {w(detail.a.ma20)} / 저항 후보 최근 20봉 고점 {w(detail.a.hi20prev)}</p>
+          </div>
+        </div>
+
+        <p className="text-[11px] mt-5 leading-relaxed" style={{color:"var(--tx3)"}}>⚠️ 위 내용은 전일 종가 기준 계산 결과에 대한 설명이며 매수·매도 권유가 아니에요. 투자 판단과 책임은 이용자 본인에게 있어요.</p>
+        <a href={"https://finance.naver.com/item/main.naver?code="+detail.code} target="_blank" rel="noreferrer" className="chip mt-4 inline-flex">네이버 증권에서 실제 차트 보기 ↗</a>
+      </div>
+    </div>}
+
+    <footer className="mt-10 text-[11px] leading-relaxed" style={{color:"var(--tx3)"}}>
+      🎣 스톡캐쳐 VOL17 — 우측 상단 배지를 눌러 screener.json 주소를 등록하면 전일 종가 기준 실데이터로 전환돼요. 미연결·오류 시에는 가상 데모 시세로 표시돼요. 본 도구는 조건 충족 종목의 탐색·안내용이며 매매 권유가 아니에요.
+    </footer>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
